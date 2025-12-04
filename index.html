@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo de Grupos del Mundial 48 Equipos</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Solución de banderas: Carga de Flag Icon CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" />
+
+    <style>
+        /* Estilos personalizados para un toque mundialista */
+        :root {
+            --primary-color: #004d98; /* Azul oscuro, típico de un torneo */
+            --secondary-color: #ffcc00; /* Dorado/Amarillo */
+            --background-color: #f7f7f7;
+            --card-bg: #ffffff;
+            --drag-over-group: rgba(255, 204, 0, 0.4);
+            --drag-over-pot: rgba(0, 123, 255, 0.4);
+            --drag-over-swap: rgba(255, 100, 0, 0.4); /* Naranja para indicar Swap */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            transition: all 0.3s ease;
+        }
+
+        .header-bg {
+            background: linear-gradient(90deg, var(--primary-color) 0%, #007bff 100%);
+        }
+
+        .group-card {
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .group-slot {
+            transition: background-color 0.15s;
+            min-height: 40px; /* Asegura altura para el drop */
+        }
+
+        /* Estilo para el slot de grupo cuando se arrastra algo encima (vacío) */
+        .group-slot.drag-over-empty {
+            background-color: var(--drag-over-group);
+            border: 2px solid var(--secondary-color);
+        }
+
+        /* Estilo para el slot de grupo cuando se arrastra algo encima (ocupado, indica swap) */
+        .group-slot.drag-over-occupied {
+            background-color: var(--drag-over-swap);
+            border: 2px solid orange;
+        }
+
+        .group-slot.draggable-team {
+            cursor: grab;
+        }
+
+        .pot-item {
+            transition: background-color 0.15s, transform 0.1s;
+        }
+
+        .pot-item:not(.used) {
+            cursor: grab;
+        }
+
+        .pot-item:not(.used):hover {
+            background-color: rgba(0, 77, 152, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .pot-item.used {
+            opacity: 0.5;
+            cursor: default;
+            text-decoration: line-through;
+            font-style: italic;
+        }
+        
+        /* Asegura que los iconos de bandera basados en CSS se muestren correctamente */
+        .flag-icon {
+            margin-right: 4px;
+            font-size: 1.2em; /* Hace las banderas ligeramente más grandes */
+            line-height: 1; /* Alinea verticalmente */
+            vertical-align: middle;
+        }
+
+        /* Estilo para la zona de regreso al bombo cuando se arrastra un equipo de grupo */
+        #pots-column.drag-over {
+            box-shadow: 0 0 20px 5px var(--primary-color);
+            background-color: var(--drag-over-pot);
+            border: 2px dashed white;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="header-bg p-4 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-extrabold tracking-tight">⚽ Sorteo de Grupos del Mundial (48 Equipos)</h1>
+            <button id="undo-button" class="undo-button bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold py-2 px-4 rounded-lg shadow-md mt-3 md:mt-0" disabled>
+                Deshacer Última Acción
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Columna de Grupos (75% en desktop) -->
+            <section id="groups-column" class="lg:w-3/4">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-gray-300 pb-2">Grupos del Mundial (A - L)</h2>
+                
+                <!-- Cuadrícula de Grupos (Central) -->
+                <div id="groups-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-4">
+                    <!-- Los 12 grupos se renderizarán aquí -->
+                </div>
+                
+                <!-- Estado de Drag and Drop -->
+                <p id="current-selection" class="mt-3 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-900 rounded-md font-bold transition duration-300 shadow-md">
+                    Arrastra un país de los Bombos al grupo deseado.
+                </p>
+            </section>
+
+            <!-- Columna de Bombos (Panel Lateral Derecho - 25% en desktop) - DROP TARGET para volver a Bombo -->
+            <section id="pots-column" 
+                     class="lg:w-1/4 lg:min-w-[300px] mt-8 lg:mt-0 p-4 rounded-xl transition duration-300"
+                     ondragover="dragOver(event)"
+                     ondragenter="dragEnterPot(event)"
+                     ondragleave="dragLeavePot(event)"
+                     ondrop="dropToPot(event)">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-gray-300 pb-2">Bombos de Países</h2>
+                <div id="pots-container" class="space-y-4">
+                    <!-- Los bombos siempre visibles se renderizarán aquí -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // --- CONSTANTES GLOBALES ---
+        const GROUPS_COUNT = 12; // A-L
+        const TEAMS_PER_GROUP = 4;
+        const GROUP_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+        
+        // Mapeo de banderas (ISO codes). Usamos códigos ISO para la librería CSS.
+        const FLAG_MAP = {
+            "Canadá": "ca", "México": "mx", "Estados Unidos": "us", "España": "es", "Argentina": "ar", "Francia": "fr", 
+            "Inglaterra": "gb-eng", 
+            "Brasil": "br", "Portugal": "pt", "Países Bajos": "nl", "Bélgica": "be", "Alemania": "de",
+            "Croacia": "hr", "Marruecos": "ma", "Colombia": "co", "Uruguay": "uy", "Suiza": "ch", "Japón": "jp", 
+            "Senegal": "sn", "Irán": "ir", "Corea del Sur": "kr", "Ecuador": "ec", "Austria": "at", "Australia": "au",
+            "Noruega": "no", "Panamá": "pa", "Egipto": "eg", "Argelia": "dz", 
+            "Escocia": "gb-sct", 
+            "Paraguay": "py", "Túnez": "tn", "Costa de Marfil": "ci", "Uzbekistán": "uz", "Qatar": "qa", "Arabia Saudita": "sa", "Sudáfrica": "za",
+            "Jordania": "jo", "Cabo Verde": "cv", "Ghana": "gh", "Curazao": "cw", "Haití": "ht", "Nueva Zelanda": "nz",
+            // Repechajes usan iconos genéricos (emojis o códigos especiales)
+            "Repechaje de Europa 1": "eu",
+            "Repechaje de Europa 2": "eu",
+            "Repechaje de Europa 3": "eu",
+            "Repechaje de Europa 4": "eu",
+            "Repechaje Intercontinental 1": "globe", 
+            "Repechaje Intercontinental 2": "globe"
+        };
+        
+        /**
+         * Retorna la estructura HTML o el emoji para la bandera.
+         */
+        function getFlag(teamName) {
+            const code = FLAG_MAP[teamName] || "white";
+            
+            // Usamos emojis para los genéricos si no hay código ISO estándar
+            if (code === "globe") return "🌎"; 
+            if (code === "eu") return "🇪🇺"; 
+            if (code === "white") return "🏳️"; 
+
+            // Retorna la estructura HTML con el código ISO para la librería Flag Icon CSS
+            return `<span class="flag-icon flag-icon-${code.toLowerCase()}"></span>`;
+        }
+
+
+        // ESTRUCTURA DE BOMBOS SIMPLIFICADA
+        const INITIAL_POT_DATA = [
+            { name: "Bombo 1 (Cabezas de Serie)", teams: ["Canadá", "México", "Estados Unidos", "España", "Argentina", "Francia", "Inglaterra", "Brasil", "Portugal", "Países Bajos", "Bélgica", "Alemania"] },
+            { name: "Bombo 2", teams: ["Croacia", "Marruecos", "Colombia", "Uruguay", "Suiza", "Japón", "Senegal", "Irán", "Corea del Sur", "Ecuador", "Austria", "Australia"] },
+            { name: "Bombo 3", teams: ["Noruega", "Panamá", "Egipto", "Argelia", "Escocia", "Paraguay", "Túnez", "Costa de Marfil", "Uzbekistán", "Qatar", "Arabia Saudita", "Sudáfrica"] },
+            { name: "Bombo 4", teams: ["Jordania", "Cabo Verde", "Ghana", "Curazao", "Haití", "Nueva Zelanda", "Repechaje de Europa 1", "Repechaje de Europa 2", "Repechaje de Europa 3", "Repechaje de Europa 4", "Repechaje Intercontinental 1", "Repechaje Intercontinental 2"] }
+        ];
+
+        // --- ESTADO DE LA APLICACIÓN ---
+        let state = {
+            groups: Array(GROUPS_COUNT).fill(null).map((_, i) => ({
+                label: GROUP_LABELS[i],
+                teams: Array(TEAMS_PER_GROUP).fill(null)
+            })),
+            pots: JSON.parse(JSON.stringify(INITIAL_POT_DATA)), // Copia profunda de datos iniciales
+            history: [] 
+        };
+
+        // --- CACHE DE ELEMENTOS DEL DOM ---
+        const groupsContainer = document.getElementById('groups-container');
+        const potsContainer = document.getElementById('pots-container');
+        const potsColumn = document.getElementById('pots-column');
+        const undoButton = document.getElementById('undo-button');
+        const currentSelectionElement = document.getElementById('current-selection');
+
+        // --- FUNCIONES DE RENDERIZADO ---
+
+        function renderGroups() {
+            groupsContainer.innerHTML = state.groups.map((group, gIdx) => {
+                return `
+                    <div class="group-card p-3 rounded-xl bg-white">
+                        <h3 class="text-xl font-bold mb-2 text-primary-color">Grupo ${group.label}</h3>
+                        <div class="space-y-1">
+                            ${group.teams.map((teamName, tIdx) => {
+                                const flagOutput = getFlag(teamName);
+                                const isOccupied = teamName !== null;
+                                const teamDisplay = isOccupied ? `${flagOutput} ${teamName}` : 'Arrastra un país aquí';
+                                const draggableClass = isOccupied ? 'draggable-team' : '';
+
+                                return `
+                                    <div class="group-slot flex items-center p-2 text-sm rounded-md transition duration-150 
+                                         ${isOccupied ? 'bg-gray-100 text-gray-700 font-medium' : 'bg-gray-50 text-gray-500 italic border border-dashed border-gray-300'} 
+                                         ${draggableClass}"
+                                         data-group-index="${gIdx}"
+                                         data-team-index="${tIdx}"
+                                         data-team-name="${teamName || ''}"
+                                         draggable="${isOccupied ? 'true' : 'false'}"
+                                         ondragstart="${isOccupied ? 'dragStart(event)' : 'event.preventDefault()'}"
+                                         ondragover="dragOver(event)"
+                                         ondragenter="dragEnterGroup(event)"
+                                         ondragleave="dragLeaveGroup(event)"
+                                         ondrop="dropToGroup(event, ${gIdx}, ${tIdx})">
+                                        <span class="w-4 font-bold text-center">${tIdx + 1}.</span>
+                                        <span class="flex-grow ml-2">${teamDisplay}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Actualizar el estado de drag
+            currentSelectionElement.textContent = 'Arrastra un país de los Bombos al grupo deseado.';
+        }
+
+        function renderPots() {
+            potsContainer.innerHTML = state.pots.map((pot, pIdx) => `
+                <div class="pot-container bg-card-bg p-4 rounded-xl shadow-md border-t-4 border-primary-color">
+                    <h3 class="text-lg font-bold mb-3 text-gray-700">${pot.name}</h3>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        ${INITIAL_POT_DATA[pIdx].teams.map(teamName => {
+                            const isUsed = !pot.teams.includes(teamName);
+                            const flagOutput = getFlag(teamName);
+                            const draggable = isUsed ? 'false' : 'true';
+
+                            return `
+                                <div class="pot-item p-1.5 rounded-lg text-center font-medium border border-gray-300 bg-gray-50 ${isUsed ? 'used' : ''}"
+                                     data-pot-index="${pIdx}"
+                                     data-team-name="${teamName}"
+                                     draggable="${draggable}"
+                                     ondragstart="${draggable === 'true' ? 'dragStart(event)' : 'event.preventDefault()'}">
+                                    ${flagOutput} ${teamName}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Actualizar el estado del botón Deshacer
+            undoButton.disabled = state.history.length === 0;
+        }
+
+        // --- LÓGICA DRAG AND DROP ---
+        
+        /**
+         * Inicia la operación de arrastre.
+         */
+        function dragStart(event) {
+            const teamName = event.target.dataset.teamName;
+            
+            let sourceInfo = {
+                teamName: teamName,
+                source: event.target.classList.contains('pot-item') ? 'pot' : 'group',
+                potIndex: event.target.dataset.potIndex,
+                groupIndex: event.target.dataset.groupIndex,
+                teamIndex: event.target.dataset.teamIndex
+            };
+
+            // Serializa la información del origen en el dataTransfer
+            event.dataTransfer.setData("application/json", JSON.stringify(sourceInfo));
+            event.dataTransfer.effectAllowed = "move";
+
+            // Añade clase para ocultar el elemento mientras se arrastra
+            setTimeout(() => event.target.style.opacity = '0.4', 0);
+        }
+
+        /**
+         * Permite que el elemento sea soltado en la zona de destino.
+         */
+        function dragOver(event) {
+            event.preventDefault(); // Necesario para permitir el drop
+            event.dataTransfer.dropEffect = "move";
+        }
+        
+        /**
+         * Resalta el slot de grupo al entrar.
+         */
+        function dragEnterGroup(event) {
+            event.preventDefault();
+            const slot = event.currentTarget;
+            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
+            const targetTeam = state.groups[slot.dataset.groupIndex].teams[slot.dataset.teamIndex];
+            
+            slot.classList.remove('drag-over-empty', 'drag-over-occupied');
+
+            if (sourceData.source === 'pot' && targetTeam === null) {
+                 // Bombo -> Espacio vacío
+                 slot.classList.add('drag-over-empty');
+            } else if (sourceData.source === 'group') {
+                // Grupo -> Cualquier espacio de Grupo
+                if (targetTeam === null) {
+                    // Grupo -> Espacio vacío
+                    slot.classList.add('drag-over-empty');
+                } else if (targetTeam !== sourceData.teamName) {
+                    // Grupo -> Espacio ocupado (Swap)
+                    slot.classList.add('drag-over-occupied');
+                }
+            }
+        }
+        
+        /**
+         * Elimina el resaltado del slot de grupo al salir.
+         */
+        function dragLeaveGroup(event) {
+            event.currentTarget.classList.remove('drag-over-empty', 'drag-over-occupied');
+        }
+
+        /**
+         * Resalta la columna de potes al entrar.
+         */
+        function dragEnterPot(event) {
+            event.preventDefault();
+            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
+
+            // Solo resaltar si el origen es un grupo
+            if (sourceData.source === 'group') {
+                potsColumn.classList.add('drag-over');
+            }
+        }
+        
+        /**
+         * Elimina el resaltado de la columna de potes al salir.
+         */
+        function dragLeavePot(event) {
+            potsColumn.classList.remove('drag-over');
+        }
+
+        /**
+         * Maneja el soltar un país en un slot de grupo.
+         */
+        function dropToGroup(event, targetGroupIndex, targetTeamIndex) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over-empty', 'drag-over-occupied');
+            
+            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
+            const targetGroup = state.groups[targetGroupIndex];
+            const targetTeamName = targetGroup.teams[targetTeamIndex]; // Equipo actualmente en el destino
+
+            // Restaurar opacidad del elemento que se arrastró
+            const draggedElement = document.querySelector(`.pot-item[data-team-name="${sourceData.teamName}"]`) || 
+                                 document.querySelector(`.group-slot[data-group-index="${sourceData.groupIndex}"][data-team-index="${sourceData.teamIndex}"]`);
+            if (draggedElement) draggedElement.style.opacity = '1';
+
+            // --- LÓGICA DE MOVIMIENTO ---
+
+            if (sourceData.source === 'pot') {
+                // Mover de Bombo a Grupo (Solo si el destino está vacío)
+                if (targetTeamName !== null) { 
+                    alertMessage('warning', 'Solo se puede arrastrar desde el Bombo a un espacio vacío.');
+                    return;
+                }
+                
+                const pot = state.pots[sourceData.potIndex];
+                const teamIndexInPot = pot.teams.indexOf(sourceData.teamName);
+
+                if (teamIndexInPot === -1) return; 
+
+                // Quitar del bombo y asignar al grupo
+                pot.teams.splice(teamIndexInPot, 1);
+                targetGroup.teams[targetTeamIndex] = sourceData.teamName;
+
+                // Registrar en el historial
+                state.history.push({
+                    type: 'draw',
+                    groupIndex: targetGroupIndex,
+                    teamIndex: targetTeamIndex,
+                    teamName: sourceData.teamName,
+                    potIndex: sourceData.potIndex
+                });
+
+                alertMessage('success', `${sourceData.teamName} agregado al Grupo ${targetGroup.label}, Posición ${targetTeamIndex + 1}.`);
+
+            } else if (sourceData.source === 'group') {
+                // Mover/Intercambiar de Grupo a Grupo
+                
+                // Evitar soltar sobre sí mismo
+                if (sourceData.groupIndex == targetGroupIndex && sourceData.teamIndex == targetTeamIndex) return; 
+
+                const sourceGroup = state.groups[sourceData.groupIndex];
+                const sourceTeamIndex = parseInt(sourceData.teamIndex);
+
+                // 1. Asignar el equipo arrastrado (sourceData.teamName) al destino
+                targetGroup.teams[targetTeamIndex] = sourceData.teamName;
+                
+                // 2. Asignar el equipo de destino (targetTeamName, que puede ser null) al origen
+                sourceGroup.teams[sourceTeamIndex] = targetTeamName; 
+
+                // Registrar en el historial
+                state.history.push({
+                    type: 'swap_or_move',
+                    fromGroup: parseInt(sourceData.groupIndex),
+                    fromTeam: sourceTeamIndex,
+                    toGroup: targetGroupIndex,
+                    toTeam: targetTeamIndex,
+                    teamMoved: sourceData.teamName,
+                    teamSwapped: targetTeamName // Será null si era un movimiento simple
+                });
+                
+                if (targetTeamName) {
+                    alertMessage('info', `Intercambio: ${sourceData.teamName} por ${targetTeamName}.`);
+                } else {
+                    alertMessage('info', `${sourceData.teamName} movido al Grupo ${targetGroup.label}, Posición ${targetTeamIndex + 1}.`);
+                }
+            }
+
+            renderGroups();
+            renderPots();
+        }
+
+        /**
+         * Maneja el soltar un país de un grupo al panel de Bombos.
+         */
+        function dropToPot(event) {
+            event.preventDefault();
+            potsColumn.classList.remove('drag-over');
+
+            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
+
+            // Restaurar opacidad del elemento que se arrastró
+            const draggedElement = document.querySelector(`.group-slot[data-group-index="${sourceData.groupIndex}"][data-team-index="${sourceData.teamIndex}"]`);
+            if (draggedElement) draggedElement.style.opacity = '1';
+
+            if (sourceData.source === 'group') {
+                // 1. Quitar equipo del grupo
+                const sourceGroup = state.groups[sourceData.groupIndex];
+                const sourceTeamIndex = parseInt(sourceData.teamIndex);
+                const teamName = sourceData.teamName;
+
+                sourceGroup.teams[sourceTeamIndex] = null;
+
+                // 2. Devolver al bombo (usamos INITIAL_POT_DATA para encontrar el bombo original)
+                let potIndex = -1;
+                for (let i = 0; i < INITIAL_POT_DATA.length; i++) {
+                    if (INITIAL_POT_DATA[i].teams.includes(teamName)) {
+                        potIndex = i;
+                        break;
+                    }
+                }
+
+                if (potIndex !== -1) {
+                    state.pots[potIndex].teams.push(teamName);
+                    // Asegurar orden
+                    state.pots[potIndex].teams.sort((a, b) => {
+                        const initialTeams = INITIAL_POT_DATA[potIndex].teams;
+                        return initialTeams.indexOf(a) - initialTeams.indexOf(b);
+                    });
+
+                    // Registrar en el historial
+                    state.history.push({
+                        type: 'return',
+                        groupIndex: sourceData.groupIndex,
+                        teamIndex: sourceTeamIndex,
+                        teamName: teamName,
+                        potIndex: potIndex
+                    });
+
+                    alertMessage('info', `${teamName} devuelto al Bombo.`);
+
+                } else {
+                    console.error("No se encontró el bombo original para el equipo.");
+                }
+
+                renderGroups();
+                renderPots();
+            }
+        }
+        
+
+        /**
+         * Deshace la última acción registrada en el historial.
+         */
+        function undoLastAction() {
+            if (state.history.length === 0) return;
+
+            const lastAction = state.history.pop();
+            const { type } = lastAction;
+
+            if (type === 'draw') {
+                // Deshacer Arrastre de Bombo a Grupo
+                const { groupIndex, teamIndex, teamName, potIndex } = lastAction;
+                state.groups[groupIndex].teams[teamIndex] = null;
+                state.pots[potIndex].teams.push(teamName);
+                state.pots[potIndex].teams.sort((a, b) => INITIAL_POT_DATA[potIndex].teams.indexOf(a) - INITIAL_POT_DATA[potIndex].teams.indexOf(b));
+                alertMessage('info', `Acción deshecha: ${teamName} removido del grupo.`);
+            } else if (type === 'return') {
+                // Deshacer Arrastre de Grupo a Bombo
+                const { groupIndex, teamIndex, teamName, potIndex } = lastAction;
+                const pot = state.pots[potIndex];
+                const teamIndexInPot = pot.teams.indexOf(teamName);
+                
+                if (teamIndexInPot !== -1) {
+                    pot.teams.splice(teamIndexInPot, 1);
+                    state.groups[groupIndex].teams[teamIndex] = teamName;
+                    alertMessage('info', `Acción deshecha: ${teamName} devuelto al grupo.`);
+                }
+            } else if (type === 'swap_or_move') {
+                // Deshacer Arrastre o Intercambio de Grupo a Grupo
+                const { fromGroup, fromTeam, toGroup, toTeam, teamMoved, teamSwapped } = lastAction;
+                
+                // Mover el equipo que se arrastró (teamMoved) de vuelta al origen
+                state.groups[fromGroup].teams[fromTeam] = teamMoved;
+                
+                // Mover el equipo que estaba en el destino (teamSwapped, puede ser null) de vuelta al destino
+                state.groups[toGroup].teams[toTeam] = teamSwapped; 
+                
+                alertMessage('info', `Acción deshecha. Restauración completada.`);
+            }
+
+            renderGroups();
+            renderPots();
+        }
+        
+        // --- MENSAJES DE ALERTA PERSONALIZADOS ---
+        function alertMessage(type, message) {
+            const messageBox = document.createElement('div');
+            messageBox.textContent = message;
+            messageBox.className = 'fixed top-4 right-4 z-50 p-3 rounded-lg shadow-xl text-white font-semibold transition-all duration-300 opacity-0 transform translate-y-4';
+
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-500');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-500');
+            } else if (type === 'info' || type === 'warning') {
+                messageBox.classList.add('bg-blue-500');
+            }
+
+            document.body.appendChild(messageBox);
+
+            // Mostrar el mensaje
+            setTimeout(() => {
+                messageBox.classList.remove('opacity-0', 'translate-y-4');
+            }, 10);
+
+            // Ocultar y remover el mensaje después de 3 segundos
+            setTimeout(() => {
+                messageBox.classList.add('opacity-0', 'translate-y-4');
+                // Remover después de la transición
+                setTimeout(() => messageBox.remove(), 300);
+            }, 3000);
+        }
+
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGroups();
+            renderPots();
+            undoButton.addEventListener('click', undoLastAction);
+            console.log("Aplicación de Sorteo de Grupos del Mundial con Drag-and-Drop inicializada.");
+        });
+    </script>
+
+</body>
+</html>
