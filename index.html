@@ -13,150 +13,76 @@
             --brand-yellow: #fcd34d;
             --text-main: #111827;
             --bg-body: #f3f4f6;
-            --header-height: 64px; /* Altura fija del header */
+            --header-height: 64px;
         }
 
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            overflow: hidden; /* Sin scroll en el body, solo en los contenedores */
+            overflow: hidden;
             touch-action: manipulation;
             margin: 0; padding: 0;
-            height: 100vh; /* Altura completa */
-            height: 100dvh; /* Altura dinámica para móviles modernos */
+            height: 100dvh;
         }
 
-        /* --- HEADER FIJO --- */
+        /* --- HEADER --- */
         header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: var(--header-height);
-            background-color: var(--brand-blue);
-            color: white;
-            z-index: 100; /* Siempre encima */
+            position: fixed; top: 0; left: 0; right: 0; height: var(--header-height);
+            background-color: var(--brand-blue); color: white; z-index: 100;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
         }
-
         .btn-reset {
             font-size: 10px; font-weight: 700; text-transform: uppercase;
             background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
             padding: 6px 10px; border-radius: 6px; cursor: pointer;
         }
 
-        /* --- CONTENEDOR PRINCIPAL (Debajo del Header) --- */
+        /* --- CONTENEDORES --- */
         .main-container {
-            position: absolute;
-            top: var(--header-height);
-            bottom: 0;
-            left: 0;
-            right: 0;
-            overflow-y: auto; /* Scroll interno */
-            background: var(--bg-body);
-            /* Padding extra abajo para que no se corte el final */
-            padding-bottom: 40px; 
+            position: absolute; top: var(--header-height); bottom: 0; left: 0; right: 0;
+            overflow-y: auto; background: var(--bg-body); padding-bottom: 40px;
         }
 
         /* --- GRUPOS --- */
-        .group-card {
-            background: white; border-radius: 12px; padding: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
-        }
-        .team-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px; margin-bottom: 4px; border-radius: 6px;
-            background: #f9fafb; border: 1px solid #e5e7eb;
-        }
+        .group-card { background: white; border-radius: 12px; padding: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
+        .team-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin-bottom: 4px; border-radius: 6px; background: #f9fafb; border: 1px solid #e5e7eb; }
         .team-row.rank-1 { background: #fffbeb; border-color: var(--brand-yellow); box-shadow: inset 3px 0 0 var(--brand-yellow); }
         .team-row.rank-2 { background: #f3f4f6; border-color: #9ca3af; box-shadow: inset 3px 0 0 #9ca3af; }
         .team-row.rank-3 { background: #fff7ed; border-color: #fdba74; box-shadow: inset 3px 0 0 #fdba74; }
-
-        .rank-badge {
-            width: 20px; height: 20px; border-radius: 50%;
-            font-size: 10px; font-weight: 900;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; transform: scale(0); transition: 0.2s;
-            background: white; color: var(--brand-blue); border: 1px solid rgba(0,0,0,0.1);
-        }
+        .rank-badge { width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0); transition: 0.2s; background: white; color: var(--brand-blue); border: 1px solid rgba(0,0,0,0.1); }
         .rank-badge.visible { opacity: 1; transform: scale(1); }
         .bg-gold { background: var(--brand-yellow); color: #000; }
         .bg-silver { background: #d1d5db; color: #000; }
         .bg-bronze { background: #fdba74; color: #000; }
 
         /* --- TERCEROS --- */
-        .third-card {
-            background: white; border-radius: 8px; padding: 10px; text-align: center;
-            opacity: 0.5; filter: grayscale(1); border: 2px solid transparent;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .third-card.picked {
-            opacity: 1; filter: grayscale(0); border-color: var(--brand-blue);
-            background: #eff6ff; transform: scale(1.05);
-        }
+        .third-card { background: white; border-radius: 8px; padding: 10px; text-align: center; opacity: 0.5; filter: grayscale(1); border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .third-card.picked { opacity: 1; filter: grayscale(0); border-color: var(--brand-blue); background: #eff6ff; transform: scale(1.05); }
 
-        /* --- BRACKET (LLAVES) --- */
-        /* Contenedor específico para el scroll horizontal del bracket */
+        /* --- BRACKET --- */
         #bracket-scroller {
-            width: 100%;
-            height: 100%;
-            overflow: auto; /* Permite scroll en ambas direcciones si hace falta */
-            display: flex;
-            align-items: flex-start; /* CRÍTICO: Alinea al TOP, no al centro vertical */
-            padding: 40px 20px; /* Padding superior generoso para separar del header */
-            background: #f8fafc;
+            width: 100%; height: 100%; overflow: auto; display: flex; align-items: flex-start;
+            padding: 40px 20px; background: #f8fafc;
         }
-        
-        .bracket-wrapper { 
-            display: flex; 
-            /* Quitamos align-items center para manejar alturas manualmente si es necesario, 
-               o usamos center pero con min-height seguro */
-            align-items: center; 
-            gap: 20px; 
-            width: max-content; 
-            margin: 0 auto; 
-            /* Asegura que haya espacio vertical */
-            min-height: 100%; 
-        }
-
-        .round-col { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            gap: 16px; /* Espacio entre partidos */
-            min-width: 60px; 
-        }
-        
+        .bracket-wrapper { display: flex; align-items: center; gap: 20px; width: max-content; margin: 0 auto; min-height: 100%; }
+        .round-col { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 60px; }
         .match-node {
-            background: white; border: 1px solid #cbd5e1; border-radius: 6px;
-            padding: 4px; width: 56px; position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; gap: 4px;
+            background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px; width: 56px; position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 4px;
         }
-        
-        .team-flag-sm { 
-            width: 100%; height: 32px; object-fit: cover; border-radius: 4px; 
-            opacity: 0.4; filter: grayscale(1); transition: 0.2s; border: 1px solid #f1f5f9;
-        }
+        .team-flag-sm { width: 100%; height: 32px; object-fit: cover; border-radius: 4px; opacity: 0.4; filter: grayscale(1); transition: 0.2s; border: 1px solid #f1f5f9; }
         .team-flag-sm.active { opacity: 1; filter: grayscale(0); }
-        .team-flag-sm.winner { 
-            border: 2px solid var(--brand-blue); z-index:10; transform: scale(1.1); 
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
+        .team-flag-sm.winner { border: 2px solid var(--brand-blue); z-index:10; transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
 
-        /* MODAL CAMPEÓN */
+        /* MODAL */
         #champion-modal { background: rgba(255, 255, 255, 0.95); z-index: 200; }
         .confetti { position: absolute; width: 10px; height: 10px; animation: fall linear forwards; }
         @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
 
         .hidden { display: none !important; }
-        .btn-action {
-            background: var(--brand-blue); color: white; font-weight: 700; text-transform: uppercase;
-            padding: 14px 28px; border-radius: 99px; border: none; box-shadow: 0 10px 20px -5px rgba(0, 74, 148, 0.4);
-        }
+        .btn-action { background: var(--brand-blue); color: white; font-weight: 700; text-transform: uppercase; padding: 14px 28px; border-radius: 99px; border: none; box-shadow: 0 10px 20px -5px rgba(0, 74, 148, 0.4); }
     </style>
 </head>
 <body>
@@ -175,11 +101,8 @@
             <div id="groups-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
         </div>
         <div class="h-20"></div> 
-        
         <div id="group-done-btn" class="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none opacity-0 transition duration-300 z-40">
-            <button onclick="initThirdsPhase()" class="btn-action pointer-events-auto flex items-center gap-2">
-                Siguiente Etapa ➜
-            </button>
+            <button onclick="initThirdsPhase()" class="btn-action pointer-events-auto flex items-center gap-2">Siguiente ➜</button>
         </div>
     </div>
 
@@ -198,8 +121,7 @@
 
     <div id="view-bracket" class="main-container hidden bg-gray-50 p-0">
         <div id="bracket-scroller">
-            <div id="bracket-canvas" class="bracket-wrapper">
-                </div>
+            <div id="bracket-canvas" class="bracket-wrapper"></div>
         </div>
     </div>
 
@@ -211,28 +133,18 @@
                 <img id="champ-flag" src="" class="w-full h-full object-cover rounded-lg">
             </div>
             <h2 id="champ-name" class="text-3xl font-black text-blue-900 mb-2">PAÍS</h2>
-            <div class="h-1 w-12 bg-yellow-400 mx-auto rounded-full mb-6"></div>
-            <button onclick="location.reload()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl transition">
-                Jugar de nuevo
-            </button>
+            <button onclick="location.reload()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl transition mt-4">Jugar de nuevo</button>
         </div>
     </div>
 
     <script>
-        // DATOS
         const groupData = [
-            { id: "A", teams: ["MEX", "RSA", "KOR", "EUR"] },
-            { id: "B", teams: ["CAN", "EUR", "QAT", "SUI"] },
-            { id: "C", teams: ["BRA", "MAR", "HAI", "SCO"] },
-            { id: "D", teams: ["USA", "PAR", "AUS", "EUR"] },
-            { id: "E", teams: ["GER", "CUW", "CIV", "ECU"] },
-            { id: "F", teams: ["NED", "JPN", "EUR", "TUN"] },
-            { id: "G", teams: ["BEL", "EGY", "IRN", "NZL"] },
-            { id: "H", teams: ["ESP", "CPV", "KSA", "URU"] },
-            { id: "I", teams: ["FRA", "SEN", "INT", "NOR"] },
-            { id: "J", teams: ["ARG", "ALG", "AUT", "JOR"] },
-            { id: "K", teams: ["POR", "INT", "UZB", "COL"] },
-            { id: "L", teams: ["ENG", "CRO", "GHA", "PAN"] }
+            { id: "A", teams: ["MEX", "RSA", "KOR", "EUR"] }, { id: "B", teams: ["CAN", "EUR", "QAT", "SUI"] },
+            { id: "C", teams: ["BRA", "MAR", "HAI", "SCO"] }, { id: "D", teams: ["USA", "PAR", "AUS", "EUR"] },
+            { id: "E", teams: ["GER", "CUW", "CIV", "ECU"] }, { id: "F", teams: ["NED", "JPN", "EUR", "TUN"] },
+            { id: "G", teams: ["BEL", "EGY", "IRN", "NZL"] }, { id: "H", teams: ["ESP", "CPV", "KSA", "URU"] },
+            { id: "I", teams: ["FRA", "SEN", "INT", "NOR"] }, { id: "J", teams: ["ARG", "ALG", "AUT", "JOR"] },
+            { id: "K", teams: ["POR", "INT", "UZB", "COL"] }, { id: "L", teams: ["ENG", "CRO", "GHA", "PAN"] }
         ];
 
         let groupsState = [], thirdPlacePool = [], selectedThirds = [], matches = {};
@@ -241,65 +153,44 @@
             groupsState = groupData.map(g => ({ id: g.id, teams: g.teams.map(code => ({ code })), selectionOrder: [] }));
             renderGroups();
         }
-
-        function confirmReset() { if(confirm("¿Reiniciar torneo?")) location.reload(); }
+        function confirmReset() { if(confirm("¿Reiniciar?")) location.reload(); }
 
         // --- GRUPOS ---
         function renderGroups() {
-            const grid = document.getElementById('groups-grid');
-            grid.innerHTML = '';
+            const grid = document.getElementById('groups-grid'); grid.innerHTML = '';
             let allComplete = true;
-
             groupsState.forEach((g, gIdx) => {
-                const card = document.createElement('div');
-                card.className = "group-card";
-                const isComplete = g.selectionOrder.length === 3;
-                if(!isComplete) allComplete = false;
-                
+                const card = document.createElement('div'); card.className = "group-card";
+                if(g.selectionOrder.length !== 3) allComplete = false;
                 card.innerHTML = `<div class="flex justify-between items-center text-xs font-bold mb-2 pb-1 border-b border-gray-100">
                     <span class="text-blue-900">GRUPO ${g.id}</span>
-                    <span class="${isComplete ? 'text-green-600' : 'text-gray-400'}">${g.selectionOrder.length}/3</span>
+                    <span class="${g.selectionOrder.length===3 ? 'text-green-600' : 'text-gray-400'}">${g.selectionOrder.length}/3</span>
                 </div>`;
-
                 g.teams.forEach((t, tIdx) => {
-                    const rankIndex = g.selectionOrder.indexOf(tIdx);
-                    const rank = rankIndex + 1;
+                    const rank = g.selectionOrder.indexOf(tIdx) + 1;
                     let badgeClass = "", rankText = "", rowClass = "";
-
-                    if(rank === 1) { badgeClass = "bg-gold visible"; rankText="1"; rowClass="rank-1"; }
-                    if(rank === 2) { badgeClass = "bg-silver visible"; rankText="2"; rowClass="rank-2"; }
-                    if(rank === 3) { badgeClass = "bg-bronze visible"; rankText="3"; rowClass="rank-3"; }
-
-                    const row = document.createElement('div');
-                    row.className = `team-row ${rowClass}`;
+                    if(rank===1){ badgeClass="bg-gold visible"; rankText="1"; rowClass="rank-1"; }
+                    else if(rank===2){ badgeClass="bg-silver visible"; rankText="2"; rowClass="rank-2"; }
+                    else if(rank===3){ badgeClass="bg-bronze visible"; rankText="3"; rowClass="rank-3"; }
+                    const row = document.createElement('div'); row.className = `team-row ${rowClass}`;
                     row.onclick = () => handleGroupClick(gIdx, tIdx);
-                    row.innerHTML = `
-                        <div class="flex items-center gap-2">
-                            <img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-6 h-4 rounded object-cover border border-gray-200">
-                            <span class="text-xs font-bold">${t.code}</span>
-                        </div>
-                        <div class="rank-badge ${badgeClass}">${rankText}</div>
-                    `;
+                    row.innerHTML = `<div class="flex items-center gap-2"><img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-6 h-4 rounded object-cover border border-gray-200"><span class="text-xs font-bold">${t.code}</span></div><div class="rank-badge ${badgeClass}">${rankText}</div>`;
                     card.appendChild(row);
                 });
                 grid.appendChild(card);
             });
-
             const btn = document.getElementById('group-done-btn');
-            if(allComplete) { btn.classList.remove('opacity-0'); btn.style.pointerEvents="auto"; } 
-            else { btn.classList.add('opacity-0'); btn.style.pointerEvents="none"; }
+            if(allComplete) { btn.classList.remove('opacity-0'); btn.style.pointerEvents="auto"; } else { btn.classList.add('opacity-0'); btn.style.pointerEvents="none"; }
         }
 
         function handleGroupClick(gIdx, tIdx) {
-            const group = groupsState[gIdx];
-            const currentOrder = group.selectionOrder;
-            const existingIndex = currentOrder.indexOf(tIdx);
-            if (existingIndex !== -1) group.selectionOrder = currentOrder.filter(idx => idx !== tIdx);
-            else if (currentOrder.length < 3) group.selectionOrder.push(tIdx);
+            const g = groupsState[gIdx];
+            const idx = g.selectionOrder.indexOf(tIdx);
+            if(idx !== -1) g.selectionOrder = g.selectionOrder.filter(i => i !== tIdx);
+            else if(g.selectionOrder.length < 3) g.selectionOrder.push(tIdx);
             renderGroups();
         }
 
-        // --- TERCEROS ---
         function initThirdsPhase() {
             thirdPlacePool = groupsState.map(g => ({ ...g.teams[g.selectionOrder[2]], groupId: g.id }));
             document.getElementById('view-groups').classList.add('hidden');
@@ -310,22 +201,16 @@
         }
 
         function renderThirdsGrid() {
-            const container = document.getElementById('thirds-container');
-            container.innerHTML = '';
+            const container = document.getElementById('thirds-container'); container.innerHTML = '';
             thirdPlacePool.forEach((t, idx) => {
                 const isSelected = selectedThirds.includes(idx);
-                const div = document.createElement('div');
-                div.className = `third-card ${isSelected ? 'picked' : ''}`;
+                const div = document.createElement('div'); div.className = `third-card ${isSelected ? 'picked' : ''}`;
                 div.onclick = () => {
                     if(selectedThirds.includes(idx)) selectedThirds = selectedThirds.filter(i => i !== idx);
                     else if(selectedThirds.length < 8) selectedThirds.push(idx);
                     renderThirdsGrid();
                 };
-                div.innerHTML = `
-                    <div class="text-[9px] font-bold text-gray-400 mb-1">G${t.groupId}</div>
-                    <img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-8 h-5 mx-auto rounded shadow-sm mb-1 object-cover">
-                    <div class="font-bold text-xs text-gray-800">${t.code}</div>
-                `;
+                div.innerHTML = `<div class="text-[9px] font-bold text-gray-400 mb-1">G${t.groupId}</div><img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-8 h-5 mx-auto rounded shadow-sm mb-1 object-cover"><div class="font-bold text-xs text-gray-800">${t.code}</div>`;
                 container.appendChild(div);
             });
             document.getElementById('thirds-counter').innerText = `${selectedThirds.length} / 8`;
@@ -333,14 +218,12 @@
             if(selectedThirds.length === 8) btn.classList.remove('hidden'); else btn.classList.add('hidden');
         }
 
-        // --- BRACKET ---
+        // --- BRACKET GENERATION (REGLAS PROTEGIDAS) ---
         function finalizeTournament() {
             document.getElementById('view-thirds').classList.add('hidden');
             document.getElementById('view-bracket').classList.remove('hidden');
             document.getElementById('step-indicator').innerText = "ELIMINATORIAS";
             generateBracket();
-            
-            // CENTRADO AUTOMÁTICO AL TROFEO (Retraso ligero para render)
             setTimeout(() => {
                 const scroller = document.getElementById('bracket-scroller');
                 const trophy = document.getElementById('trophy-col');
@@ -357,22 +240,32 @@
             const validThirds = selectedThirds.map(idx => thirdPlacePool[idx]);
             let tc = 0; const get3rd = () => (tc < validThirds.length ? validThirds[tc++] : { code: "TBD" });
 
+            /* DISPOSICIÓN PROTEGIDA (ARG/ENG Left - ESP/FRA Right)
+              ----------------------------------------------------
+              Objetivo: 1J (Arg) y 1H (Esp) en lados opuestos (Final).
+                        1L (Eng) y 1I (Fra) separados de los anteriores hasta Semis.
+            */
             const matchesData = [
+                // === LADO IZQUIERDO (Left) ===
                 { id: 1, p1: get2nd("A"), p2: get2nd("B"), next: 17 },
-                { id: 2, p1: get1st("J"), p2: get3rd(), next: 17 }, 
+                { id: 2, p1: get1st("J"), p2: get3rd(), next: 17 },      // <--- ARGENTINA (1J)
                 { id: 3, p1: get1st("C"), p2: get2nd("F"), next: 18 },    
                 { id: 4, p1: get1st("E"), p2: get2nd("I"), next: 18 },    
+                
                 { id: 5, p1: get1st("G"), p2: get3rd(), next: 19 },
                 { id: 6, p1: get1st("D"), p2: get3rd(), next: 19 },
-                { id: 7, p1: get1st("L"), p2: get3rd(), next: 20 }, 
-                { id: 8, p1: get1st("F"), p2: get2nd("C"), next: 20 },
+                { id: 7, p1: get1st("L"), p2: get3rd(), next: 20 },      // <--- INGLATERRA (1L)
+                { id: 8, p1: get1st("F"), p2: get2nd("C"), next: 20 },   
+                
+                // === LADO DERECHO (Right) ===
                 { id: 9, p1: get1st("A"), p2: get3rd(), next: 21 },
-                { id: 10, p1: get1st("H"), p2: get2nd("J"), next: 21 },
+                { id: 10, p1: get1st("H"), p2: get2nd("J"), next: 21 },  // <--- ESPAÑA (1H)
                 { id: 11, p1: get1st("K"), p2: get3rd(), next: 22 },
                 { id: 12, p1: get1st("B"), p2: get3rd(), next: 22 },
+                
                 { id: 13, p1: get2nd("D"), p2: get2nd("G"), next: 23 },
                 { id: 14, p1: get2nd("E"), p2: get2nd("K"), next: 23 },
-                { id: 15, p1: get1st("I"), p2: get3rd(), next: 24 }, 
+                { id: 15, p1: get1st("I"), p2: get3rd(), next: 24 },     // <--- FRANCIA (1I)
                 { id: 16, p1: get2nd("H"), p2: get2nd("L"), next: 24 }     
             ];
 
@@ -388,13 +281,9 @@
         }
 
         function renderVisualBracket() {
-            // "Congelar" scroll
             const scroller = document.getElementById('bracket-scroller');
-            const scrollX = scroller.scrollLeft;
-            const scrollY = scroller.scrollTop;
-
-            const canvas = document.getElementById('bracket-canvas');
-            canvas.innerHTML = '';
+            const scrollX = scroller.scrollLeft; const scrollY = scroller.scrollTop;
+            const canvas = document.getElementById('bracket-canvas'); canvas.innerHTML = '';
             
             const cols = [
                 { ids: [1,2,3,4,5,6,7,8] }, { ids: [17,18,19,20] }, { ids: [25,26] }, { ids: [29] },
@@ -403,55 +292,36 @@
             ];
 
             cols.forEach(col => {
-                const colDiv = document.createElement('div');
-                colDiv.className = "round-col";
-                if(col.isFinal) {
-                    colDiv.id = "trophy-col"; // Para auto-centrado
-                    colDiv.innerHTML = `<div class="text-4xl text-center mb-4 animate-bounce">🏆</div>`;
-                }
-                
+                const colDiv = document.createElement('div'); colDiv.className = "round-col";
+                if(col.isFinal) { colDiv.id = "trophy-col"; colDiv.innerHTML = `<div class="text-4xl text-center mb-4 animate-bounce">🏆</div>`; }
                 col.ids.forEach(id => {
                     const m = matches[id];
-                    const div = document.createElement('div');
-                    div.className = "match-node";
-                    const p1 = m.p1 ? m.p1.code : "?";
-                    const p2 = m.p2 ? m.p2.code : "?";
-                    
+                    const div = document.createElement('div'); div.className = "match-node";
+                    const p1 = m.p1 ? m.p1.code : "?"; const p2 = m.p2 ? m.p2.code : "?";
                     div.innerHTML = `
-                        <div onclick="pickWinner(${id}, 'p1')" class="cursor-pointer">
-                            <img src="https://flagcdn.com/w40/${translateFlag(p1)}.png" class="team-flag-sm ${m.p1 ? 'active' : ''} ${m.winner?.code===p1 ? 'winner':''}">
-                        </div>
+                        <div onclick="pickWinner(${id}, 'p1')" class="cursor-pointer"><img src="https://flagcdn.com/w40/${translateFlag(p1)}.png" class="team-flag-sm ${m.p1 ? 'active' : ''} ${m.winner?.code===p1 ? 'winner':''}"></div>
                         <div class="h-[1px] bg-gray-200 w-full"></div>
-                        <div onclick="pickWinner(${id}, 'p2')" class="cursor-pointer">
-                            <img src="https://flagcdn.com/w40/${translateFlag(p2)}.png" class="team-flag-sm ${m.p2 ? 'active' : ''} ${m.winner?.code===p2 ? 'winner':''}">
-                        </div>
+                        <div onclick="pickWinner(${id}, 'p2')" class="cursor-pointer"><img src="https://flagcdn.com/w40/${translateFlag(p2)}.png" class="team-flag-sm ${m.p2 ? 'active' : ''} ${m.winner?.code===p2 ? 'winner':''}"></div>
                     `;
                     colDiv.appendChild(div);
                 });
                 canvas.appendChild(colDiv);
             });
-
-            // Restaurar scroll (evita saltos)
-            scroller.scrollLeft = scrollX;
-            scroller.scrollTop = scrollY;
+            scroller.scrollLeft = scrollX; scroller.scrollTop = scrollY;
         }
 
         function pickWinner(mid, slot) {
             const m = matches[mid];
             const winner = slot === 'p1' ? m.p1 : m.p2;
             if(!winner || !winner.code || winner.code === "?") return;
-
             if(m.winner && m.winner.code !== winner.code && m.next) resetTree(m.next);
             m.winner = winner;
-
             if(m.next) {
                 const nextM = matches[m.next];
                 const isTopSlot = (mid % 2 !== 0); 
                 if(isTopSlot) nextM.p1 = winner; else nextM.p2 = winner;
                 nextM.winner = null;
-            } else {
-                 showChampion(winner);
-            }
+            } else { showChampion(winner); }
             renderVisualBracket();
         }
 
@@ -463,26 +333,16 @@
 
         function showChampion(team) {
             const modal = document.getElementById('champion-modal');
-            const flag = document.getElementById('champ-flag');
-            const name = document.getElementById('champ-name');
-            const layer = document.getElementById('confetti-layer');
-
-            flag.src = `https://flagcdn.com/w320/${translateFlag(team.code)}.png`;
-            name.innerText = team.code;
-            
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-
-            layer.innerHTML = '';
+            document.getElementById('champ-flag').src = `https://flagcdn.com/w320/${translateFlag(team.code)}.png`;
+            document.getElementById('champ-name').innerText = team.code;
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            const layer = document.getElementById('confetti-layer'); layer.innerHTML = '';
             const colors = ['#fcd34d', '#004a94', '#ffffff', '#ef4444'];
             for(let i=0; i<80; i++) {
-                const el = document.createElement('div');
-                el.className = 'confetti';
-                el.style.left = Math.random() * 100 + '%';
-                el.style.top = -10 + 'px';
+                const el = document.createElement('div'); el.className = 'confetti';
+                el.style.left = Math.random() * 100 + '%'; el.style.top = -10 + 'px';
                 el.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
                 el.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                el.style.animationDelay = Math.random() * 2 + 's';
                 layer.appendChild(el);
             }
         }
