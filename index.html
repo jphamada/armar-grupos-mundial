@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prode Mundial 2026</title>
+    <title>Mundial 2026 Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
@@ -16,32 +16,35 @@
             --card-bg: #ffffff;
         }
 
-        /* --- Estilos Base --- */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            overflow: hidden; /* Evita scroll global indeseado */
+            overflow: hidden; /* Vital para App-like feel */
             touch-action: manipulation;
         }
 
-        /* --- HEADER & NAV --- */
+        /* --- HEADER --- */
         header {
             background-color: var(--brand-blue);
             color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 50; /* Por encima de todo */
         }
 
         .btn-reset {
             font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 4px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 10px;
+            border-radius: 6px;
             cursor: pointer;
+            transition: 0.2s;
         }
+        .btn-reset:active { background: rgba(255,255,255,0.3); }
 
         /* --- GRUPOS --- */
         .group-card {
@@ -49,7 +52,7 @@
             border-radius: 12px;
             padding: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
         }
         .team-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -65,7 +68,7 @@
             font-size: 10px; font-weight: 900;
             display: flex; align-items: center; justify-content: center;
             opacity: 0; transform: scale(0); transition: 0.2s;
-            background: white; color: var(--brand-blue);
+            background: white; color: var(--brand-blue); border: 1px solid rgba(0,0,0,0.1);
         }
         .rank-badge.visible { opacity: 1; transform: scale(1); }
         .bg-gold { background: var(--brand-yellow); color: #000; }
@@ -73,68 +76,65 @@
         .bg-bronze { background: #fdba74; color: #000; }
 
         /* --- TERCEROS --- */
-        .thirds-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
         .third-card {
             background: white; border-radius: 8px; padding: 10px; text-align: center;
-            opacity: 0.6; filter: grayscale(1); transition: 0.2s; border: 2px solid transparent;
+            opacity: 0.5; filter: grayscale(1); transition: 0.2s; border: 2px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .third-card.picked {
             opacity: 1; filter: grayscale(0); border-color: var(--brand-blue);
-            background: #eff6ff; transform: scale(1.05);
+            background: #eff6ff; transform: scale(1.05); box-shadow: 0 4px 8px rgba(0, 74, 148, 0.2);
         }
 
-        /* --- BRACKET --- */
+        /* --- BRACKET (LLAVES) --- */
         #bracket-scroller {
             overflow: auto;
-            height: calc(100vh - 64px); /* Altura total menos header */
+            /* Altura total del viewport menos el header (64px) */
+            height: calc(100vh - 64px); 
             width: 100vw;
             display: flex;
-            /* No justify-center aquí para permitir el scroll manual libre */
-            padding: 40px 20px; /* Padding extra para que no se pegue a los bordes */
+            /* Padding superior extra grande para que no se tape con el header al scrollear al tope */
+            padding: 40px 20px; 
             background: #f8fafc;
+            position: relative;
+            z-index: 10;
         }
-        .bracket-wrapper { display: flex; align-items: center; gap: 24px; width: max-content; margin: 0 auto; } /* Margin auto centra si es menor al ancho */
+        .bracket-wrapper { 
+            display: flex; align-items: center; gap: 24px; 
+            width: max-content; margin: 0 auto; 
+            padding-bottom: 60px; /* Espacio abajo para scrollear cómodo */
+        }
         .round-col { display: flex; flex-direction: column; justify-content: space-around; gap: 12px; min-width: 60px; }
         
         .match-node {
-            background: white; border: 1px solid #e2e8f0; border-radius: 8px;
-            padding: 4px; width: 54px; position: relative;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column; gap: 6px;
+            background: white; border: 1px solid #cbd5e1; border-radius: 6px;
+            padding: 4px; width: 56px; position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; gap: 4px;
         }
         
         .team-flag-sm { 
-            width: 100%; height: 28px; object-fit: cover; border-radius: 4px; 
-            opacity: 0.3; filter: grayscale(1); transition: 0.2s; border: 1px solid #f3f4f6;
+            width: 100%; height: 32px; object-fit: cover; border-radius: 4px; 
+            opacity: 0.4; filter: grayscale(1); transition: 0.2s; border: 1px solid #f1f5f9;
         }
         .team-flag-sm.active { opacity: 1; filter: grayscale(0); }
         .team-flag-sm.winner { 
             border: 2px solid var(--brand-blue); z-index:10; transform: scale(1.1); 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
-        /* --- CAMPEÓN MODAL --- */
+        /* MODAL CAMPEÓN */
         #champion-modal {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
         }
-        .champion-card {
-            background: white;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0,0,0,0.05);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-
-        /* Confeti */
         .confetti { position: absolute; width: 10px; height: 10px; animation: fall linear forwards; }
         @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
 
-        /* Utilidades */
         .hidden { display: none !important; }
         .btn-action {
             background: var(--brand-blue); color: white; font-weight: 700; text-transform: uppercase;
-            padding: 14px 28px; border-radius: 99px; border: none; box-shadow: 0 10px 15px -3px rgba(0, 74, 148, 0.3);
+            padding: 14px 28px; border-radius: 99px; border: none; box-shadow: 0 10px 20px -5px rgba(0, 74, 148, 0.4);
             transition: 0.2s;
         }
         .btn-action:active { transform: scale(0.95); }
@@ -142,22 +142,18 @@
 </head>
 <body class="h-screen flex flex-col">
 
-    <header class="h-16 flex items-center justify-between px-4 shrink-0 z-50">
-        <div class="flex flex-col leading-tight">
+    <header class="h-16 flex items-center justify-between px-4 shrink-0">
+        <div>
             <h1 class="text-sm font-black tracking-tight">MUNDIAL <span style="color: var(--brand-yellow);">2026</span></h1>
-            <span id="step-indicator" class="text-[10px] opacity-80 uppercase font-medium">Fase de Grupos</span>
+            <span id="step-indicator" class="text-[10px] opacity-90 font-medium tracking-wide">FASE DE GRUPOS</span>
         </div>
-        
-        <button onclick="confirmReset()" class="btn-reset">
-            Reiniciar
-        </button>
+        <button onclick="confirmReset()" class="btn-reset">Reiniciar</button>
     </header>
 
     <div id="view-groups" class="flex-1 overflow-y-auto p-4 pb-24 bg-gray-50">
         <div class="mb-4 text-center">
-            <p class="text-xs text-gray-500 mb-2">Ordena los clasificados (1º, 2º, 3º):</p>
-            <div class="groups-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="groups-grid">
-                </div>
+            <p class="text-xs text-gray-500 mb-2">Ordena: 1º, 2º y 3º de cada grupo</p>
+            <div id="groups-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
         </div>
         <div id="group-done-btn" class="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none opacity-0 transition duration-300 z-40">
             <button onclick="initThirdsPhase()" class="btn-action pointer-events-auto flex items-center gap-2">
@@ -166,13 +162,13 @@
         </div>
     </div>
 
-    <div id="view-thirds" class="flex-1 hidden flex-col p-4 absolute inset-0 z-[60]" style="background: rgba(243, 244, 246, 0.98);">
-        <div class="mt-16 text-center mb-6">
+    <div id="view-thirds" class="flex-1 hidden flex-col p-4 absolute inset-0 z-[60]" style="background: #f3f4f6;">
+        <div class="mt-20 text-center mb-6">
             <h2 class="text-2xl font-bold text-blue-900">Repechaje</h2>
             <p class="text-sm text-gray-600">Elige a los <span class="font-bold text-blue-600">8 mejores terceros</span></p>
             <div class="mt-2 text-xl font-bold text-blue-800" id="thirds-counter">0 / 8</div>
         </div>
-        <div id="thirds-container" class="thirds-grid overflow-y-auto flex-1 pb-24"></div>
+        <div id="thirds-container" class="grid grid-cols-3 gap-3 overflow-y-auto flex-1 pb-24 px-2"></div>
         <div id="thirds-done-btn" class="fixed bottom-8 left-0 right-0 flex justify-center hidden">
             <button onclick="finalizeTournament()" class="btn-action">Generar Llave 🏆</button>
         </div>
@@ -188,20 +184,14 @@
     <div id="champion-modal" class="fixed inset-0 z-[100] hidden flex-col items-center justify-center p-6 text-center">
         <div id="confetti-layer" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
         
-        <div class="champion-card p-10 rounded-3xl max-w-sm w-full relative z-10">
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Campeón del Mundo</div>
-            
-            <div class="relative w-32 h-20 mx-auto mb-6 shadow-lg rotate-1">
-                <img id="champ-flag" src="" class="w-full h-full object-cover rounded-lg border border-gray-100">
-                <div class="absolute -top-3 -right-3 text-3xl">🌟</div>
+        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full relative z-10 border border-gray-100 transform scale-100">
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">¡Nuevo Campeón!</div>
+            <div class="relative w-32 h-20 mx-auto mb-4 shadow-md rotate-1">
+                <img id="champ-flag" src="" class="w-full h-full object-cover rounded-lg">
             </div>
-            
-            <h2 id="champ-name" class="text-4xl font-black text-blue-900 mb-2">PAÍS</h2>
-            <div class="h-1 w-16 bg-yellow-400 mx-auto rounded-full mb-6"></div>
-            
-            <p class="text-gray-500 text-sm mb-8">¡Felicitaciones! Has completado la simulación del Mundial 2026.</p>
-            
-            <button onclick="location.reload()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">
+            <h2 id="champ-name" class="text-3xl font-black text-blue-900 mb-2">PAÍS</h2>
+            <div class="h-1 w-12 bg-yellow-400 mx-auto rounded-full mb-6"></div>
+            <button onclick="location.reload()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl transition">
                 Jugar de nuevo
             </button>
         </div>
@@ -231,9 +221,7 @@
             renderGroups();
         }
 
-        function confirmReset() {
-            if(confirm("¿Reiniciar todo el torneo?")) location.reload();
-        }
+        function confirmReset() { if(confirm("¿Reiniciar torneo?")) location.reload(); }
 
         // --- GRUPOS ---
         function renderGroups() {
@@ -296,7 +284,7 @@
             document.getElementById('view-groups').classList.add('hidden');
             document.getElementById('view-thirds').classList.remove('hidden');
             document.getElementById('view-thirds').classList.add('flex');
-            document.getElementById('step-indicator').innerText = "Repechaje";
+            document.getElementById('step-indicator').innerText = "REPECHAJE";
             renderThirdsGrid();
         }
 
@@ -328,16 +316,19 @@
         function finalizeTournament() {
             document.getElementById('view-thirds').classList.add('hidden');
             document.getElementById('view-bracket').classList.remove('hidden');
-            document.getElementById('step-indicator').innerText = "Eliminatorias";
+            document.getElementById('step-indicator').innerText = "ELIMINATORIAS";
             generateBracket();
             
-            // CENTRADO AUTOMÁTICO INICIAL
+            // CENTRADO AUTOMÁTICO AL TROFEO
             setTimeout(() => {
                 const scroller = document.getElementById('bracket-scroller');
-                // Calcula el centro exacto: (AnchoTotalContenido - AnchoVisible) / 2
-                const centerPos = (scroller.scrollWidth - scroller.clientWidth) / 2;
-                scroller.scrollTo({ left: centerPos, behavior: 'smooth' });
-            }, 100);
+                const trophy = document.getElementById('trophy-col');
+                if(scroller && trophy) {
+                    // Calculamos para centrar el trofeo en la pantalla
+                    const centerPos = trophy.offsetLeft - (scroller.clientWidth / 2) + (trophy.clientWidth / 2);
+                    scroller.scrollTo({ left: centerPos, behavior: 'smooth' });
+                }
+            }, 300);
         }
 
         function generateBracket() {
@@ -377,8 +368,14 @@
         }
 
         function renderVisualBracket() {
+            const scroller = document.getElementById('bracket-scroller');
+            // Guardamos la posición actual del scroll antes de repintar
+            const scrollX = scroller.scrollLeft;
+            const scrollY = scroller.scrollTop;
+
             const canvas = document.getElementById('bracket-canvas');
             canvas.innerHTML = '';
+            
             const cols = [
                 { ids: [1,2,3,4,5,6,7,8] }, { ids: [17,18,19,20] }, { ids: [25,26] }, { ids: [29] },
                 { ids: [31], isFinal: true },
@@ -388,7 +385,10 @@
             cols.forEach(col => {
                 const colDiv = document.createElement('div');
                 colDiv.className = "round-col";
-                if(col.isFinal) colDiv.innerHTML = `<div class="text-3xl text-center mb-2 animate-bounce">🏆</div>`;
+                if(col.isFinal) {
+                    colDiv.id = "trophy-col"; // ID para centrado
+                    colDiv.innerHTML = `<div class="text-4xl text-center mb-4 animate-bounce">🏆</div>`;
+                }
                 
                 col.ids.forEach(id => {
                     const m = matches[id];
@@ -410,7 +410,10 @@
                 });
                 canvas.appendChild(colDiv);
             });
-            // NOTA: Eliminamos el scroll automático aquí para evitar que salte al hacer clic
+
+            // Restauramos el scroll para evitar saltos
+            scroller.scrollLeft = scrollX;
+            scroller.scrollTop = scrollY;
         }
 
         function pickWinner(mid, slot) {
@@ -451,10 +454,9 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
 
-            // Generar Confetti (Papelitos)
+            // Confetti
             layer.innerHTML = '';
-            const colors = ['#fcd34d', '#004a94', '#ffffff']; // Colores genéricos del mundial/marca
-            
+            const colors = ['#fcd34d', '#004a94', '#ffffff', '#ef4444'];
             for(let i=0; i<80; i++) {
                 const el = document.createElement('div');
                 el.className = 'confetti';
