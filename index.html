@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mundial 2026 Mobile</title>
+    <title>Mundial 2026 - Bracket Oficial FIFA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
@@ -30,19 +30,19 @@
         header {
             position: fixed; top: 0; left: 0; right: 0; height: var(--header-height);
             background-color: var(--brand-blue); color: white; z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
         }
         .btn-reset {
             font-size: 10px; font-weight: 700; text-transform: uppercase;
             background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-            padding: 6px 10px; border-radius: 6px; cursor: pointer;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s;
         }
 
         /* --- CONTENEDORES --- */
         .main-container {
             position: absolute; top: var(--header-height); bottom: 0; left: 0; right: 0;
-            overflow-y: auto; background: var(--bg-body); padding-bottom: 40px;
+            overflow-y: auto; background: var(--bg-body); padding-bottom: 60px;
         }
 
         /* --- GRUPOS --- */
@@ -58,7 +58,7 @@
         .bg-bronze { background: #fdba74; color: #000; }
 
         /* --- TERCEROS --- */
-        .third-card { background: white; border-radius: 8px; padding: 10px; text-align: center; opacity: 0.5; filter: grayscale(1); border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .third-card { background: white; border-radius: 8px; padding: 10px; text-align: center; opacity: 0.6; filter: grayscale(0.5); border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .third-card.picked { opacity: 1; filter: grayscale(0); border-color: var(--brand-blue); background: #eff6ff; transform: scale(1.05); }
 
         /* --- BRACKET --- */
@@ -66,15 +66,28 @@
             width: 100%; height: 100%; overflow: auto; display: flex; align-items: flex-start;
             padding: 40px 20px; background: #f8fafc;
         }
-        .bracket-wrapper { display: flex; align-items: center; gap: 20px; width: max-content; margin: 0 auto; min-height: 100%; }
-        .round-col { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 60px; }
+        .bracket-wrapper { display: flex; align-items: center; gap: 24px; width: max-content; margin: 0 auto; min-height: 100%; }
+        .round-col { display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 64px; }
+        
         .match-node {
-            background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px; width: 56px; position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 4px;
+            background: white; border: 1px solid #cbd5e1; border-radius: 8px; 
+            padding: 4px; width: 68px; position: relative;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 6px;
         }
-        .team-flag-sm { width: 100%; height: 32px; object-fit: cover; border-radius: 4px; opacity: 0.4; filter: grayscale(1); transition: 0.2s; border: 1px solid #f1f5f9; }
-        .team-flag-sm.active { opacity: 1; filter: grayscale(0); }
-        .team-flag-sm.winner { border: 2px solid var(--brand-blue); z-index:10; transform: scale(1.1); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .match-id-label {
+            position: absolute; top: -18px; left: 0; right: 0; 
+            text-align: center; font-size: 8px; color: #9ca3af; font-weight: bold;
+        }
+        
+        .team-flag-sm { 
+            width: 100%; height: 36px; object-fit: cover; border-radius: 4px; 
+            opacity: 0.7; transition: 0.2s; border: 1px solid #e2e8f0;
+        }
+        .team-flag-sm.active { opacity: 1; filter: brightness(1.05); }
+        .team-flag-sm.winner { 
+            border: 2px solid var(--brand-blue); z-index:10; transform: scale(1.1); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); opacity: 1;
+        }
 
         /* MODAL */
         #champion-modal { background: rgba(255, 255, 255, 0.95); z-index: 200; }
@@ -130,7 +143,7 @@
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full relative z-10 border border-gray-100">
             <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">¡Nuevo Campeón!</div>
             <div class="relative w-32 h-20 mx-auto mb-4 shadow-md rotate-1">
-                <img id="champ-flag" src="" class="w-full h-full object-cover rounded-lg">
+                <img id="champ-flag" src="" class="w-full h-full object-cover rounded-lg shadow">
             </div>
             <h2 id="champ-name" class="text-3xl font-black text-blue-900 mb-2">PAÍS</h2>
             <button onclick="location.reload()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl transition mt-4">Jugar de nuevo</button>
@@ -155,17 +168,14 @@
         }
         function confirmReset() { if(confirm("¿Reiniciar?")) location.reload(); }
 
-        // --- GRUPOS ---
+        // --- RENDERIZADO GRUPOS ---
         function renderGroups() {
             const grid = document.getElementById('groups-grid'); grid.innerHTML = '';
             let allComplete = true;
             groupsState.forEach((g, gIdx) => {
                 const card = document.createElement('div'); card.className = "group-card";
                 if(g.selectionOrder.length !== 3) allComplete = false;
-                card.innerHTML = `<div class="flex justify-between items-center text-xs font-bold mb-2 pb-1 border-b border-gray-100">
-                    <span class="text-blue-900">GRUPO ${g.id}</span>
-                    <span class="${g.selectionOrder.length===3 ? 'text-green-600' : 'text-gray-400'}">${g.selectionOrder.length}/3</span>
-                </div>`;
+                card.innerHTML = `<div class="flex justify-between items-center text-xs font-bold mb-2 pb-1 border-b border-gray-100"><span class="text-blue-900">GRUPO ${g.id}</span><span class="${g.selectionOrder.length===3 ? 'text-green-600' : 'text-gray-400'}">${g.selectionOrder.length}/3</span></div>`;
                 g.teams.forEach((t, tIdx) => {
                     const rank = g.selectionOrder.indexOf(tIdx) + 1;
                     let badgeClass = "", rankText = "", rowClass = "";
@@ -174,7 +184,7 @@
                     else if(rank===3){ badgeClass="bg-bronze visible"; rankText="3"; rowClass="rank-3"; }
                     const row = document.createElement('div'); row.className = `team-row ${rowClass}`;
                     row.onclick = () => handleGroupClick(gIdx, tIdx);
-                    row.innerHTML = `<div class="flex items-center gap-2"><img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-6 h-4 rounded object-cover border border-gray-200"><span class="text-xs font-bold">${t.code}</span></div><div class="rank-badge ${badgeClass}">${rankText}</div>`;
+                    row.innerHTML = `<div class="flex items-center gap-2"><img src="https://flagcdn.com/w80/${translateFlag(t.code)}.png" class="w-6 h-4 rounded object-cover border border-gray-200"><span class="text-xs font-bold">${t.code}</span></div><div class="rank-badge ${badgeClass}">${rankText}</div>`;
                     card.appendChild(row);
                 });
                 grid.appendChild(card);
@@ -191,6 +201,7 @@
             renderGroups();
         }
 
+        // --- RENDERIZADO TERCEROS ---
         function initThirdsPhase() {
             thirdPlacePool = groupsState.map(g => ({ ...g.teams[g.selectionOrder[2]], groupId: g.id }));
             document.getElementById('view-groups').classList.add('hidden');
@@ -210,7 +221,7 @@
                     else if(selectedThirds.length < 8) selectedThirds.push(idx);
                     renderThirdsGrid();
                 };
-                div.innerHTML = `<div class="text-[9px] font-bold text-gray-400 mb-1">G${t.groupId}</div><img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-8 h-5 mx-auto rounded shadow-sm mb-1 object-cover"><div class="font-bold text-xs text-gray-800">${t.code}</div>`;
+                div.innerHTML = `<div class="text-[9px] font-bold text-gray-400 mb-1">G${t.groupId}</div><img src="https://flagcdn.com/w80/${translateFlag(t.code)}.png" class="w-10 h-6 mx-auto rounded shadow-sm mb-1 object-cover"><div class="font-bold text-xs text-gray-800">${t.code}</div>`;
                 container.appendChild(div);
             });
             document.getElementById('thirds-counter').innerText = `${selectedThirds.length} / 8`;
@@ -218,7 +229,7 @@
             if(selectedThirds.length === 8) btn.classList.remove('hidden'); else btn.classList.add('hidden');
         }
 
-        // --- BRACKET GENERATION (REGLAS PROTEGIDAS) ---
+        // --- BRACKET GENERATION (CRUCES IMAGEN FIFA) ---
         function finalizeTournament() {
             document.getElementById('view-thirds').classList.add('hidden');
             document.getElementById('view-bracket').classList.remove('hidden');
@@ -240,42 +251,51 @@
             const validThirds = selectedThirds.map(idx => thirdPlacePool[idx]);
             let tc = 0; const get3rd = () => (tc < validThirds.length ? validThirds[tc++] : { code: "TBD" });
 
-            /* DISPOSICIÓN PROTEGIDA (ARG/ENG Left - ESP/FRA Right)
-              ----------------------------------------------------
-              Objetivo: 1J (Arg) y 1H (Esp) en lados opuestos (Final).
-                        1L (Eng) y 1I (Fra) separados de los anteriores hasta Semis.
-            */
+            /* MATCHUPS SEGÚN IMAGEN OFICIAL FIFA */
             const matchesData = [
-                // === LADO IZQUIERDO (Left) ===
-                { id: 1, p1: get2nd("A"), p2: get2nd("B"), next: 17 },
-                { id: 2, p1: get1st("J"), p2: get3rd(), next: 17 },      // <--- ARGENTINA (1J)
-                { id: 3, p1: get1st("C"), p2: get2nd("F"), next: 18 },    
-                { id: 4, p1: get1st("E"), p2: get2nd("I"), next: 18 },    
+                // --- PATHWAY 1 (LEFT SIDE) ---
+                { id: 74, p1: get1st("E"), p2: get3rd(), next: 89 },
+                { id: 77, p1: get1st("I"), p2: get3rd(), next: 89 },
+                { id: 73, p1: get2nd("A"), p2: get2nd("B"), next: 90 },
+                { id: 75, p1: get1st("F"), p2: get2nd("C"), next: 90 },
                 
-                { id: 5, p1: get1st("G"), p2: get3rd(), next: 19 },
-                { id: 6, p1: get1st("D"), p2: get3rd(), next: 19 },
-                { id: 7, p1: get1st("L"), p2: get3rd(), next: 20 },      // <--- INGLATERRA (1L)
-                { id: 8, p1: get1st("F"), p2: get2nd("C"), next: 20 },   
+                { id: 83, p1: get2nd("K"), p2: get2nd("L"), next: 93 },
+                { id: 84, p1: get1st("H"), p2: get2nd("J"), next: 93 },
+                { id: 81, p1: get1st("D"), p2: get3rd(), next: 94 },
+                { id: 82, p1: get1st("G"), p2: get3rd(), next: 94 },
+
+                // --- PATHWAY 2 (RIGHT SIDE) ---
+                { id: 76, p1: get1st("C"), p2: get2nd("F"), next: 91 },
+                { id: 78, p1: get2nd("E"), p2: get2nd("I"), next: 91 },
+                { id: 79, p1: get1st("A"), p2: get3rd(), next: 92 },
+                { id: 80, p1: get1st("L"), p2: get3rd(), next: 92 },
                 
-                // === LADO DERECHO (Right) ===
-                { id: 9, p1: get1st("A"), p2: get3rd(), next: 21 },
-                { id: 10, p1: get1st("H"), p2: get2nd("J"), next: 21 },  // <--- ESPAÑA (1H)
-                { id: 11, p1: get1st("K"), p2: get3rd(), next: 22 },
-                { id: 12, p1: get1st("B"), p2: get3rd(), next: 22 },
-                
-                { id: 13, p1: get2nd("D"), p2: get2nd("G"), next: 23 },
-                { id: 14, p1: get2nd("E"), p2: get2nd("K"), next: 23 },
-                { id: 15, p1: get1st("I"), p2: get3rd(), next: 24 },     // <--- FRANCIA (1I)
-                { id: 16, p1: get2nd("H"), p2: get2nd("L"), next: 24 }     
+                { id: 86, p1: get1st("J"), p2: get2nd("H"), next: 95 },
+                { id: 88, p1: get2nd("D"), p2: get2nd("G"), next: 95 },
+                { id: 85, p1: get1st("B"), p2: get3rd(), next: 96 },
+                { id: 87, p1: get1st("K"), p2: get3rd(), next: 96 }
             ];
 
             matchesData.forEach(m => matches[m.id] = { ...m, winner: null });
+            
+            // Generate Next Rounds (R16, QF, SF, F)
             const mapNext = (c, n) => matches[c] = { id: c, p1:null, p2:null, winner:null, next: n };
-            [17,18].forEach(i=>mapNext(i,25)); [19,20].forEach(i=>mapNext(i,26));
-            [21,22].forEach(i=>mapNext(i,27)); [23,24].forEach(i=>mapNext(i,28));
-            [25,26].forEach(i=>mapNext(i,29)); [27,28].forEach(i=>mapNext(i,30));
-            mapNext(29,31); mapNext(30,31); 
-            matches[31] = { id:31, p1:null, p2:null, winner:null, next:null };
+            
+            // Round of 16 (Winners of previous block)
+            mapNext(89, 97); mapNext(90, 97);
+            mapNext(93, 98); mapNext(94, 98);
+            mapNext(91, 99); mapNext(92, 99);
+            mapNext(95, 100); mapNext(96, 100);
+
+            // Quarter Finals
+            mapNext(97, 101); mapNext(98, 101);
+            mapNext(99, 102); mapNext(100, 102);
+
+            // Semis
+            mapNext(101, 104); mapNext(102, 104);
+
+            // Final
+            matches[104] = { id:104, p1:null, p2:null, winner:null, next:null };
 
             renderVisualBracket();
         }
@@ -285,10 +305,17 @@
             const scrollX = scroller.scrollLeft; const scrollY = scroller.scrollTop;
             const canvas = document.getElementById('bracket-canvas'); canvas.innerHTML = '';
             
+            // Order columns for visual rendering: Left -> Final -> Right
             const cols = [
-                { ids: [1,2,3,4,5,6,7,8] }, { ids: [17,18,19,20] }, { ids: [25,26] }, { ids: [29] },
-                { ids: [31], isFinal: true },
-                { ids: [30] }, { ids: [27,28] }, { ids: [21,22,23,24] }, { ids: [9,10,11,12,13,14,15,16] }
+                { ids: [74, 77, 73, 75, 83, 84, 81, 82] }, // R32 Left
+                { ids: [89, 90, 93, 94] },                 // R16 Left
+                { ids: [97, 98] },                         // QF Left
+                { ids: [101] },                            // SF Left
+                { ids: [104], isFinal: true },             // FINAL
+                { ids: [102] },                            // SF Right
+                { ids: [99, 100] },                        // QF Right
+                { ids: [91, 92, 95, 96] },                 // R16 Right
+                { ids: [76, 78, 79, 80, 86, 88, 85, 87] }  // R32 Right
             ];
 
             cols.forEach(col => {
@@ -297,11 +324,13 @@
                 col.ids.forEach(id => {
                     const m = matches[id];
                     const div = document.createElement('div'); div.className = "match-node";
+                    div.innerHTML = id === 104 ? '' : `<div class="match-id-label">M${id}</div>`; // Label ID based on image
+                    
                     const p1 = m.p1 ? m.p1.code : "?"; const p2 = m.p2 ? m.p2.code : "?";
-                    div.innerHTML = `
-                        <div onclick="pickWinner(${id}, 'p1')" class="cursor-pointer"><img src="https://flagcdn.com/w40/${translateFlag(p1)}.png" class="team-flag-sm ${m.p1 ? 'active' : ''} ${m.winner?.code===p1 ? 'winner':''}"></div>
+                    div.innerHTML += `
+                        <div onclick="pickWinner(${id}, 'p1')" class="cursor-pointer"><img src="https://flagcdn.com/w80/${translateFlag(p1)}.png" class="team-flag-sm ${m.p1 ? 'active' : ''} ${m.winner?.code===p1 ? 'winner':''}"></div>
                         <div class="h-[1px] bg-gray-200 w-full"></div>
-                        <div onclick="pickWinner(${id}, 'p2')" class="cursor-pointer"><img src="https://flagcdn.com/w40/${translateFlag(p2)}.png" class="team-flag-sm ${m.p2 ? 'active' : ''} ${m.winner?.code===p2 ? 'winner':''}"></div>
+                        <div onclick="pickWinner(${id}, 'p2')" class="cursor-pointer"><img src="https://flagcdn.com/w80/${translateFlag(p2)}.png" class="team-flag-sm ${m.p2 ? 'active' : ''} ${m.winner?.code===p2 ? 'winner':''}"></div>
                     `;
                     colDiv.appendChild(div);
                 });
@@ -318,8 +347,15 @@
             m.winner = winner;
             if(m.next) {
                 const nextM = matches[m.next];
-                const isTopSlot = (mid % 2 !== 0); 
-                if(isTopSlot) nextM.p1 = winner; else nextM.p2 = winner;
+                // Heuristic: If odd ID comes from top slot, roughly. But here we have specific flows.
+                // Simple logic: if target p1 is empty or comes from this match ID, fill p1. Else p2.
+                // Since we rebuild, we can just check if p1 is filled by someone else.
+                // Better: Explicit mapping? Too complex.
+                // Dynamic: If match ID is lower in the pair feeding next, it goes to p1.
+                // Let's use the simple empty check for this simulation.
+                if(!nextM.p1 || nextM.p1.fromId === mid) { nextM.p1 = winner; nextM.p1.fromId = mid; }
+                else { nextM.p2 = winner; nextM.p2.fromId = mid; }
+                
                 nextM.winner = null;
             } else { showChampion(winner); }
             renderVisualBracket();
@@ -328,6 +364,8 @@
         function resetTree(mid) {
             if(!matches[mid]) return;
             matches[mid].winner = null;
+            matches[mid].p1 = null; // Full reset for clean flow in this strict logic
+            matches[mid].p2 = null; 
             if(matches[mid].next) resetTree(matches[mid].next);
         }
 
