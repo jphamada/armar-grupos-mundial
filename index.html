@@ -2,586 +2,546 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteo de Grupos del Mundial 48 Equipos</title>
-    <!-- Carga de Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prode Mundial 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
-    <!-- Solución de banderas: Carga de Flag Icon CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" />
-
     <style>
-        /* Estilos personalizados para un toque mundialista */
         :root {
-            --primary-color: #004d98; /* Azul oscuro, típico de un torneo */
-            --secondary-color: #ffcc00; /* Dorado/Amarillo */
-            --background-color: #f7f7f7;
+            --brand-blue: #004a94;
+            --brand-yellow: #fcd34d;
+            --text-main: #111827;
+            --bg-body: #f3f4f6;
+            --whatsapp-green: #25D366;
+            
             --card-bg: #ffffff;
-            --drag-over-group: rgba(255, 204, 0, 0.4);
-            --drag-over-pot: rgba(0, 123, 255, 0.4);
-            --drag-over-swap: rgba(255, 100, 0, 0.4); /* Naranja para indicar Swap */
+            --silver: #e5e7eb;
+            --bronze: #ffedd5;
         }
 
+        /* --- Estilos Base --- */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background-color);
-            transition: all 0.3s ease;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow: hidden;
+            touch-action: manipulation;
         }
 
-        .header-bg {
-            background: linear-gradient(90deg, var(--primary-color) 0%, #007bff 100%);
+        h1, h2, .brand-font {
+            font-family: 'Roboto', serif;
+            font-weight: 700;
         }
 
+        /* --- UI COMPONENTS --- */
         .group-card {
-            border: 2px solid var(--primary-color);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        .group-slot {
-            transition: background-color 0.15s;
-            min-height: 40px; /* Asegura altura para el drop */
-        }
-
-        /* Estilo para el slot de grupo cuando se arrastra algo encima (vacío) */
-        .group-slot.drag-over-empty {
-            background-color: var(--drag-over-group);
-            border: 2px solid var(--secondary-color);
-        }
-
-        /* Estilo para el slot de grupo cuando se arrastra algo encima (ocupado, indica swap) */
-        .group-slot.drag-over-occupied {
-            background-color: var(--drag-over-swap);
-            border: 2px solid orange;
-        }
-
-        .group-slot.draggable-team {
-            cursor: grab;
-        }
-
-        .pot-item {
-            transition: background-color 0.15s, transform 0.1s;
-        }
-
-        .pot-item:not(.used) {
-            cursor: grab;
-        }
-
-        .pot-item:not(.used):hover {
-            background-color: rgba(0, 77, 152, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .pot-item.used {
-            opacity: 0.5;
-            cursor: default;
-            text-decoration: line-through;
-            font-style: italic;
+        .team-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 8px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            color: var(--text-main);
         }
         
-        /* Asegura que los iconos de bandera basados en CSS se muestren correctamente */
-        .flag-icon {
-            margin-right: 4px;
-            font-size: 1.2em; /* Hace las banderas ligeramente más grandes */
-            line-height: 1; /* Alinea verticalmente */
-            vertical-align: middle;
+        /* Estados de Selección */
+        .team-row.rank-1 { background: #fffbeb; border-color: var(--brand-yellow); box-shadow: inset 4px 0 0 var(--brand-yellow); }
+        .team-row.rank-2 { background: #f3f4f6; border-color: #9ca3af; box-shadow: inset 4px 0 0 #9ca3af; }
+        .team-row.rank-3 { background: #fff7ed; border-color: #fdba74; box-shadow: inset 4px 0 0 #fdba74; }
+
+        .rank-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--brand-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        .rank-badge.visible { opacity: 1; transform: scale(1); }
+        
+        .bg-gold { background: var(--brand-yellow); color: #000; border: none; }
+        .bg-silver { background: #d1d5db; color: #000; border: none; }
+        .bg-bronze { background: #fdba74; color: #000; border: none; }
+
+        /* --- THIRDS SELECTION VIEW --- */
+        .thirds-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 10px;
+        }
+        .third-card {
+            background: white;
+            border: 2px solid transparent;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            opacity: 0.6;
+            transition: 0.2s;
+            filter: grayscale(1);
+        }
+        .third-card.picked {
+            opacity: 1;
+            filter: grayscale(0);
+            border-color: var(--brand-blue);
+            background: #eff6ff;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 74, 148, 0.2);
         }
 
-        /* Estilo para la zona de regreso al bombo cuando se arrastra un equipo de grupo */
-        #pots-column.drag-over {
-            box-shadow: 0 0 20px 5px var(--primary-color);
-            background-color: var(--drag-over-pot);
-            border: 2px dashed white;
+        /* --- BRACKET --- */
+        #bracket-scroller {
+            overflow: auto;
+            height: calc(100vh - 60px);
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f8fafc; /* Fondo muy suave para el bracket */
+        }
+        .bracket-wrapper { display: flex; align-items: center; gap: 20px; width: max-content; padding: 0 20px; }
+        .round-col { display: flex; flex-direction: column; justify-content: space-around; gap: 10px; min-width: 60px; }
+        
+        .match-node {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 4px;
+            width: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        /* Líneas conectoras del bracket (Pseudo-elementos simulados visualmente por gap, o borders) */
+        /* Para esta versión móvil simple, usamos el gap flex. */
+
+        .team-flag-sm { 
+            width: 100%; 
+            height: 24px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            opacity: 0.3; 
+            filter: grayscale(1); 
+            transition: 0.2s; 
+            border: 1px solid #f3f4f6;
+        }
+        .team-flag-sm.active { opacity: 1; filter: grayscale(0); }
+        .team-flag-sm.winner { 
+            border: 2px solid var(--brand-blue); 
+            z-index:10; 
+            transform: scale(1.1); 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        /* UTIL */
+        .hidden { display: none !important; }
+        
+        .btn-action {
+            background: var(--brand-blue);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 14px 28px;
+            border-radius: 99px;
+            box-shadow: 0 10px 15px -3px rgba(0, 74, 148, 0.3);
+            border: none;
+            font-family: 'Roboto', sans-serif;
+            letter-spacing: 0.5px;
+            transition: transform 0.2s;
+        }
+        .btn-action:active { transform: scale(0.95); }
+
+        /* Header Style Override */
+        header {
+            background-color: var(--brand-blue) !important;
+            color: white;
+        }
+        
+        #step-indicator {
+            background-color: rgba(255,255,255,0.2);
+            color: var(--brand-yellow);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="h-screen flex flex-col">
 
-    <header class="header-bg p-4 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
-            <h1 class="text-3xl font-extrabold tracking-tight">⚽ Sorteo de Grupos del Mundial (48 Equipos)</h1>
-            <button id="undo-button" class="undo-button bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-bold py-2 px-4 rounded-lg shadow-md mt-3 md:mt-0" disabled>
-                Deshacer Última Acción
-            </button>
+    <header class="h-16 flex items-center justify-between px-5 shadow-md shrink-0 z-50">
+        <h1 class="text-lg tracking-tight">MUNDIAL <span style="color: var(--brand-yellow);">2026</span></h1>
+        <div id="step-indicator" class="text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+            Fase de Grupos
         </div>
     </header>
 
-    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full">
-        <div class="flex flex-col lg:flex-row gap-6">
-            <!-- Columna de Grupos (75% en desktop) -->
-            <section id="groups-column" class="lg:w-3/4">
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-gray-300 pb-2">Grupos del Mundial (A - L)</h2>
-                
-                <!-- Cuadrícula de Grupos (Central) -->
-                <div id="groups-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-4">
-                    <!-- Los 12 grupos se renderizarán aquí -->
-                </div>
-                
-                <!-- Estado de Drag and Drop -->
-                <p id="current-selection" class="mt-3 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-900 rounded-md font-bold transition duration-300 shadow-md">
-                    Arrastra un país de los Bombos al grupo deseado.
-                </p>
-            </section>
-
-            <!-- Columna de Bombos (Panel Lateral Derecho - 25% en desktop) - DROP TARGET para volver a Bombo -->
-            <section id="pots-column" 
-                     class="lg:w-1/4 lg:min-w-[300px] mt-8 lg:mt-0 p-4 rounded-xl transition duration-300"
-                     ondragover="dragOver(event)"
-                     ondragenter="dragEnterPot(event)"
-                     ondragleave="dragLeavePot(event)"
-                     ondrop="dropToPot(event)">
-                <h2 class="text-2xl font-bold mb-4 text-gray-800 border-b-2 border-gray-300 pb-2">Bombos de Países</h2>
-                <div id="pots-container" class="space-y-4">
-                    <!-- Los bombos siempre visibles se renderizarán aquí -->
-                </div>
-            </section>
+    <div id="view-groups" class="flex-1 overflow-y-auto p-4 pb-24 bg-gray-50">
+        <div class="mb-6 text-center">
+            <p class="text-sm text-gray-500 font-medium">Toca para ordenar la tabla de posiciones:</p>
+            <div class="flex justify-center gap-4 mt-3 text-[11px] font-bold text-gray-600">
+                <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-gold"></div> 1º Líder</span>
+                <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-silver"></div> 2º Escolta</span>
+                <span class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-bronze"></div> 3º</span>
+            </div>
         </div>
-    </main>
+
+        <div id="groups-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            </div>
+        
+        <div id="group-done-btn" class="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none opacity-0 transition-opacity duration-500 z-40">
+            <button onclick="initThirdsPhase()" class="btn-action pointer-events-auto flex items-center gap-2">
+                Siguiente Etapa <span class="text-xl">→</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="view-thirds" class="flex-1 hidden flex-col p-4 absolute inset-0 z-[60]" style="background: rgba(243, 244, 246, 0.95); backdrop-filter: blur(5px);">
+        <div class="text-center mb-6 mt-12">
+            <h2 class="text-2xl text-blue-900 mb-2">Mejores Terceros</h2>
+            <p class="text-sm text-gray-600">Selecciona a los <span class="text-blue-600 font-bold">8 equipos</span> que completan el cuadro.</p>
+            <div class="mt-4 inline-block bg-white px-4 py-1 rounded-full shadow-sm border border-gray-200">
+                <p id="thirds-counter" class="text-lg font-bold text-blue-800">0 / 8</p>
+            </div>
+        </div>
+        
+        <div id="thirds-container" class="thirds-grid overflow-y-auto flex-1 pb-24">
+            </div>
+
+        <div id="thirds-done-btn" class="fixed bottom-8 left-0 right-0 flex justify-center hidden">
+            <button onclick="finalizeTournament()" class="btn-action shadow-lg">
+                Generar Llave 🏆
+            </button>
+        </div>
+    </div>
+
+    <div id="view-bracket" class="flex-1 hidden relative">
+        <div id="bracket-scroller">
+            <div id="bracket-canvas" class="bracket-wrapper">
+                </div>
+        </div>
+        <button onclick="location.reload()" class="fixed top-20 right-4 text-[11px] font-bold bg-white border border-gray-300 px-3 py-2 rounded text-gray-600 shadow-sm uppercase">Reiniciar</button>
+    </div>
 
     <script>
-        // --- CONSTANTES GLOBALES ---
-        const GROUPS_COUNT = 12; // A-L
-        const TEAMS_PER_GROUP = 4;
-        const GROUP_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
-        
-        // Mapeo de banderas (ISO codes). Usamos códigos ISO para la librería CSS.
-        const FLAG_MAP = {
-            "Canadá": "ca", "México": "mx", "Estados Unidos": "us", "España": "es", "Argentina": "ar", "Francia": "fr", 
-            "Inglaterra": "gb-eng", 
-            "Brasil": "br", "Portugal": "pt", "Países Bajos": "nl", "Bélgica": "be", "Alemania": "de",
-            "Croacia": "hr", "Marruecos": "ma", "Colombia": "co", "Uruguay": "uy", "Suiza": "ch", "Japón": "jp", 
-            "Senegal": "sn", "Irán": "ir", "Corea del Sur": "kr", "Ecuador": "ec", "Austria": "at", "Australia": "au",
-            "Noruega": "no", "Panamá": "pa", "Egipto": "eg", "Argelia": "dz", 
-            "Escocia": "gb-sct", 
-            "Paraguay": "py", "Túnez": "tn", "Costa de Marfil": "ci", "Uzbekistán": "uz", "Qatar": "qa", "Arabia Saudita": "sa", "Sudáfrica": "za",
-            "Jordania": "jo", "Cabo Verde": "cv", "Ghana": "gh", "Curazao": "cw", "Haití": "ht", "Nueva Zelanda": "nz",
-            // Repechajes usan iconos genéricos (emojis o códigos especiales)
-            "Repechaje de Europa 1": "eu",
-            "Repechaje de Europa 2": "eu",
-            "Repechaje de Europa 3": "eu",
-            "Repechaje de Europa 4": "eu",
-            "Repechaje Intercontinental 1": "globe", 
-            "Repechaje Intercontinental 2": "globe"
-        };
-        
-        /**
-         * Retorna la estructura HTML o el emoji para la bandera.
-         */
-        function getFlag(teamName) {
-            const code = FLAG_MAP[teamName] || "white";
-            
-            // Usamos emojis para los genéricos si no hay código ISO estándar
-            if (code === "globe") return "🌎"; 
-            if (code === "eu") return "🇪🇺"; 
-            if (code === "white") return "🏳️"; 
-
-            // Retorna la estructura HTML con el código ISO para la librería Flag Icon CSS
-            return `<span class="flag-icon flag-icon-${code.toLowerCase()}"></span>`;
-        }
-
-
-        // ESTRUCTURA DE BOMBOS SIMPLIFICADA
-        const INITIAL_POT_DATA = [
-            { name: "Bombo 1 (Cabezas de Serie)", teams: ["Canadá", "México", "Estados Unidos", "España", "Argentina", "Francia", "Inglaterra", "Brasil", "Portugal", "Países Bajos", "Bélgica", "Alemania"] },
-            { name: "Bombo 2", teams: ["Croacia", "Marruecos", "Colombia", "Uruguay", "Suiza", "Japón", "Senegal", "Irán", "Corea del Sur", "Ecuador", "Austria", "Australia"] },
-            { name: "Bombo 3", teams: ["Noruega", "Panamá", "Egipto", "Argelia", "Escocia", "Paraguay", "Túnez", "Costa de Marfil", "Uzbekistán", "Qatar", "Arabia Saudita", "Sudáfrica"] },
-            { name: "Bombo 4", teams: ["Jordania", "Cabo Verde", "Ghana", "Curazao", "Haití", "Nueva Zelanda", "Repechaje de Europa 1", "Repechaje de Europa 2", "Repechaje de Europa 3", "Repechaje de Europa 4", "Repechaje Intercontinental 1", "Repechaje Intercontinental 2"] }
+        // --- DATOS ---
+        const groupData = [
+            { id: "A", teams: ["MEX", "RSA", "KOR", "EUR"] },
+            { id: "B", teams: ["CAN", "EUR", "QAT", "SUI"] },
+            { id: "C", teams: ["BRA", "MAR", "HAI", "SCO"] },
+            { id: "D", teams: ["USA", "PAR", "AUS", "EUR"] },
+            { id: "E", teams: ["GER", "CUW", "CIV", "ECU"] },
+            { id: "F", teams: ["NED", "JPN", "EUR", "TUN"] },
+            { id: "G", teams: ["BEL", "EGY", "IRN", "NZL"] },
+            { id: "H", teams: ["ESP", "CPV", "KSA", "URU"] },
+            { id: "I", teams: ["FRA", "SEN", "INT", "NOR"] },
+            { id: "J", teams: ["ARG", "ALG", "AUT", "JOR"] },
+            { id: "K", teams: ["POR", "INT", "UZB", "COL"] },
+            { id: "L", teams: ["ENG", "CRO", "GHA", "PAN"] }
         ];
 
-        // --- ESTADO DE LA APLICACIÓN ---
-        let state = {
-            groups: Array(GROUPS_COUNT).fill(null).map((_, i) => ({
-                label: GROUP_LABELS[i],
-                teams: Array(TEAMS_PER_GROUP).fill(null)
-            })),
-            pots: JSON.parse(JSON.stringify(INITIAL_POT_DATA)), // Copia profunda de datos iniciales
-            history: [] 
-        };
-
-        // --- CACHE DE ELEMENTOS DEL DOM ---
-        const groupsContainer = document.getElementById('groups-container');
-        const potsContainer = document.getElementById('pots-container');
-        const potsColumn = document.getElementById('pots-column');
-        const undoButton = document.getElementById('undo-button');
-        const currentSelectionElement = document.getElementById('current-selection');
-
-        // --- FUNCIONES DE RENDERIZADO ---
-
-        function renderGroups() {
-            groupsContainer.innerHTML = state.groups.map((group, gIdx) => {
-                return `
-                    <div class="group-card p-3 rounded-xl bg-white">
-                        <h3 class="text-xl font-bold mb-2 text-primary-color">Grupo ${group.label}</h3>
-                        <div class="space-y-1">
-                            ${group.teams.map((teamName, tIdx) => {
-                                const flagOutput = getFlag(teamName);
-                                const isOccupied = teamName !== null;
-                                const teamDisplay = isOccupied ? `${flagOutput} ${teamName}` : 'Arrastra un país aquí';
-                                const draggableClass = isOccupied ? 'draggable-team' : '';
-
-                                return `
-                                    <div class="group-slot flex items-center p-2 text-sm rounded-md transition duration-150 
-                                         ${isOccupied ? 'bg-gray-100 text-gray-700 font-medium' : 'bg-gray-50 text-gray-500 italic border border-dashed border-gray-300'} 
-                                         ${draggableClass}"
-                                         data-group-index="${gIdx}"
-                                         data-team-index="${tIdx}"
-                                         data-team-name="${teamName || ''}"
-                                         draggable="${isOccupied ? 'true' : 'false'}"
-                                         ondragstart="${isOccupied ? 'dragStart(event)' : 'event.preventDefault()'}"
-                                         ondragover="dragOver(event)"
-                                         ondragenter="dragEnterGroup(event)"
-                                         ondragleave="dragLeaveGroup(event)"
-                                         ondrop="dropToGroup(event, ${gIdx}, ${tIdx})">
-                                        <span class="w-4 font-bold text-center">${tIdx + 1}.</span>
-                                        <span class="flex-grow ml-2">${teamDisplay}</span>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            // Actualizar el estado de drag
-            currentSelectionElement.textContent = 'Arrastra un país de los Bombos al grupo deseado.';
-        }
-
-        function renderPots() {
-            potsContainer.innerHTML = state.pots.map((pot, pIdx) => `
-                <div class="pot-container bg-card-bg p-4 rounded-xl shadow-md border-t-4 border-primary-color">
-                    <h3 class="text-lg font-bold mb-3 text-gray-700">${pot.name}</h3>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        ${INITIAL_POT_DATA[pIdx].teams.map(teamName => {
-                            const isUsed = !pot.teams.includes(teamName);
-                            const flagOutput = getFlag(teamName);
-                            const draggable = isUsed ? 'false' : 'true';
-
-                            return `
-                                <div class="pot-item p-1.5 rounded-lg text-center font-medium border border-gray-300 bg-gray-50 ${isUsed ? 'used' : ''}"
-                                     data-pot-index="${pIdx}"
-                                     data-team-name="${teamName}"
-                                     draggable="${draggable}"
-                                     ondragstart="${draggable === 'true' ? 'dragStart(event)' : 'event.preventDefault()'}">
-                                    ${flagOutput} ${teamName}
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `).join('');
-            
-            // Actualizar el estado del botón Deshacer
-            undoButton.disabled = state.history.length === 0;
-        }
-
-        // --- LÓGICA DRAG AND DROP ---
-        
-        /**
-         * Inicia la operación de arrastre.
-         */
-        function dragStart(event) {
-            const teamName = event.target.dataset.teamName;
-            
-            let sourceInfo = {
-                teamName: teamName,
-                source: event.target.classList.contains('pot-item') ? 'pot' : 'group',
-                potIndex: event.target.dataset.potIndex,
-                groupIndex: event.target.dataset.groupIndex,
-                teamIndex: event.target.dataset.teamIndex
-            };
-
-            // Serializa la información del origen en el dataTransfer
-            event.dataTransfer.setData("application/json", JSON.stringify(sourceInfo));
-            event.dataTransfer.effectAllowed = "move";
-
-            // Añade clase para ocultar el elemento mientras se arrastra
-            setTimeout(() => event.target.style.opacity = '0.4', 0);
-        }
-
-        /**
-         * Permite que el elemento sea soltado en la zona de destino.
-         */
-        function dragOver(event) {
-            event.preventDefault(); // Necesario para permitir el drop
-            event.dataTransfer.dropEffect = "move";
-        }
-        
-        /**
-         * Resalta el slot de grupo al entrar.
-         */
-        function dragEnterGroup(event) {
-            event.preventDefault();
-            const slot = event.currentTarget;
-            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
-            const targetTeam = state.groups[slot.dataset.groupIndex].teams[slot.dataset.teamIndex];
-            
-            slot.classList.remove('drag-over-empty', 'drag-over-occupied');
-
-            if (sourceData.source === 'pot' && targetTeam === null) {
-                 // Bombo -> Espacio vacío
-                 slot.classList.add('drag-over-empty');
-            } else if (sourceData.source === 'group') {
-                // Grupo -> Cualquier espacio de Grupo
-                if (targetTeam === null) {
-                    // Grupo -> Espacio vacío
-                    slot.classList.add('drag-over-empty');
-                } else if (targetTeam !== sourceData.teamName) {
-                    // Grupo -> Espacio ocupado (Swap)
-                    slot.classList.add('drag-over-occupied');
-                }
-            }
-        }
-        
-        /**
-         * Elimina el resaltado del slot de grupo al salir.
-         */
-        function dragLeaveGroup(event) {
-            event.currentTarget.classList.remove('drag-over-empty', 'drag-over-occupied');
-        }
-
-        /**
-         * Resalta la columna de potes al entrar.
-         */
-        function dragEnterPot(event) {
-            event.preventDefault();
-            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
-
-            // Solo resaltar si el origen es un grupo
-            if (sourceData.source === 'group') {
-                potsColumn.classList.add('drag-over');
-            }
-        }
-        
-        /**
-         * Elimina el resaltado de la columna de potes al salir.
-         */
-        function dragLeavePot(event) {
-            potsColumn.classList.remove('drag-over');
-        }
-
-        /**
-         * Maneja el soltar un país en un slot de grupo.
-         */
-        function dropToGroup(event, targetGroupIndex, targetTeamIndex) {
-            event.preventDefault();
-            event.currentTarget.classList.remove('drag-over-empty', 'drag-over-occupied');
-            
-            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
-            const targetGroup = state.groups[targetGroupIndex];
-            const targetTeamName = targetGroup.teams[targetTeamIndex]; // Equipo actualmente en el destino
-
-            // Restaurar opacidad del elemento que se arrastró
-            const draggedElement = document.querySelector(`.pot-item[data-team-name="${sourceData.teamName}"]`) || 
-                                 document.querySelector(`.group-slot[data-group-index="${sourceData.groupIndex}"][data-team-index="${sourceData.teamIndex}"]`);
-            if (draggedElement) draggedElement.style.opacity = '1';
-
-            // --- LÓGICA DE MOVIMIENTO ---
-
-            if (sourceData.source === 'pot') {
-                // Mover de Bombo a Grupo (Solo si el destino está vacío)
-                if (targetTeamName !== null) { 
-                    alertMessage('warning', 'Solo se puede arrastrar desde el Bombo a un espacio vacío.');
-                    return;
-                }
-                
-                const pot = state.pots[sourceData.potIndex];
-                const teamIndexInPot = pot.teams.indexOf(sourceData.teamName);
-
-                if (teamIndexInPot === -1) return; 
-
-                // Quitar del bombo y asignar al grupo
-                pot.teams.splice(teamIndexInPot, 1);
-                targetGroup.teams[targetTeamIndex] = sourceData.teamName;
-
-                // Registrar en el historial
-                state.history.push({
-                    type: 'draw',
-                    groupIndex: targetGroupIndex,
-                    teamIndex: targetTeamIndex,
-                    teamName: sourceData.teamName,
-                    potIndex: sourceData.potIndex
-                });
-
-                alertMessage('success', `${sourceData.teamName} agregado al Grupo ${targetGroup.label}, Posición ${targetTeamIndex + 1}.`);
-
-            } else if (sourceData.source === 'group') {
-                // Mover/Intercambiar de Grupo a Grupo
-                
-                // Evitar soltar sobre sí mismo
-                if (sourceData.groupIndex == targetGroupIndex && sourceData.teamIndex == targetTeamIndex) return; 
-
-                const sourceGroup = state.groups[sourceData.groupIndex];
-                const sourceTeamIndex = parseInt(sourceData.teamIndex);
-
-                // 1. Asignar el equipo arrastrado (sourceData.teamName) al destino
-                targetGroup.teams[targetTeamIndex] = sourceData.teamName;
-                
-                // 2. Asignar el equipo de destino (targetTeamName, que puede ser null) al origen
-                sourceGroup.teams[sourceTeamIndex] = targetTeamName; 
-
-                // Registrar en el historial
-                state.history.push({
-                    type: 'swap_or_move',
-                    fromGroup: parseInt(sourceData.groupIndex),
-                    fromTeam: sourceTeamIndex,
-                    toGroup: targetGroupIndex,
-                    toTeam: targetTeamIndex,
-                    teamMoved: sourceData.teamName,
-                    teamSwapped: targetTeamName // Será null si era un movimiento simple
-                });
-                
-                if (targetTeamName) {
-                    alertMessage('info', `Intercambio: ${sourceData.teamName} por ${targetTeamName}.`);
-                } else {
-                    alertMessage('info', `${sourceData.teamName} movido al Grupo ${targetGroup.label}, Posición ${targetTeamIndex + 1}.`);
-                }
-            }
-
-            renderGroups();
-            renderPots();
-        }
-
-        /**
-         * Maneja el soltar un país de un grupo al panel de Bombos.
-         */
-        function dropToPot(event) {
-            event.preventDefault();
-            potsColumn.classList.remove('drag-over');
-
-            const sourceData = JSON.parse(event.dataTransfer.getData("application/json"));
-
-            // Restaurar opacidad del elemento que se arrastró
-            const draggedElement = document.querySelector(`.group-slot[data-group-index="${sourceData.groupIndex}"][data-team-index="${sourceData.teamIndex}"]`);
-            if (draggedElement) draggedElement.style.opacity = '1';
-
-            if (sourceData.source === 'group') {
-                // 1. Quitar equipo del grupo
-                const sourceGroup = state.groups[sourceData.groupIndex];
-                const sourceTeamIndex = parseInt(sourceData.teamIndex);
-                const teamName = sourceData.teamName;
-
-                sourceGroup.teams[sourceTeamIndex] = null;
-
-                // 2. Devolver al bombo (usamos INITIAL_POT_DATA para encontrar el bombo original)
-                let potIndex = -1;
-                for (let i = 0; i < INITIAL_POT_DATA.length; i++) {
-                    if (INITIAL_POT_DATA[i].teams.includes(teamName)) {
-                        potIndex = i;
-                        break;
-                    }
-                }
-
-                if (potIndex !== -1) {
-                    state.pots[potIndex].teams.push(teamName);
-                    // Asegurar orden
-                    state.pots[potIndex].teams.sort((a, b) => {
-                        const initialTeams = INITIAL_POT_DATA[potIndex].teams;
-                        return initialTeams.indexOf(a) - initialTeams.indexOf(b);
-                    });
-
-                    // Registrar en el historial
-                    state.history.push({
-                        type: 'return',
-                        groupIndex: sourceData.groupIndex,
-                        teamIndex: sourceTeamIndex,
-                        teamName: teamName,
-                        potIndex: potIndex
-                    });
-
-                    alertMessage('info', `${teamName} devuelto al Bombo.`);
-
-                } else {
-                    console.error("No se encontró el bombo original para el equipo.");
-                }
-
-                renderGroups();
-                renderPots();
-            }
-        }
-        
-
-        /**
-         * Deshace la última acción registrada en el historial.
-         */
-        function undoLastAction() {
-            if (state.history.length === 0) return;
-
-            const lastAction = state.history.pop();
-            const { type } = lastAction;
-
-            if (type === 'draw') {
-                // Deshacer Arrastre de Bombo a Grupo
-                const { groupIndex, teamIndex, teamName, potIndex } = lastAction;
-                state.groups[groupIndex].teams[teamIndex] = null;
-                state.pots[potIndex].teams.push(teamName);
-                state.pots[potIndex].teams.sort((a, b) => INITIAL_POT_DATA[potIndex].teams.indexOf(a) - INITIAL_POT_DATA[potIndex].teams.indexOf(b));
-                alertMessage('info', `Acción deshecha: ${teamName} removido del grupo.`);
-            } else if (type === 'return') {
-                // Deshacer Arrastre de Grupo a Bombo
-                const { groupIndex, teamIndex, teamName, potIndex } = lastAction;
-                const pot = state.pots[potIndex];
-                const teamIndexInPot = pot.teams.indexOf(teamName);
-                
-                if (teamIndexInPot !== -1) {
-                    pot.teams.splice(teamIndexInPot, 1);
-                    state.groups[groupIndex].teams[teamIndex] = teamName;
-                    alertMessage('info', `Acción deshecha: ${teamName} devuelto al grupo.`);
-                }
-            } else if (type === 'swap_or_move') {
-                // Deshacer Arrastre o Intercambio de Grupo a Grupo
-                const { fromGroup, fromTeam, toGroup, toTeam, teamMoved, teamSwapped } = lastAction;
-                
-                // Mover el equipo que se arrastró (teamMoved) de vuelta al origen
-                state.groups[fromGroup].teams[fromTeam] = teamMoved;
-                
-                // Mover el equipo que estaba en el destino (teamSwapped, puede ser null) de vuelta al destino
-                state.groups[toGroup].teams[toTeam] = teamSwapped; 
-                
-                alertMessage('info', `Acción deshecha. Restauración completada.`);
-            }
-
-            renderGroups();
-            renderPots();
-        }
-        
-        // --- MENSAJES DE ALERTA PERSONALIZADOS ---
-        function alertMessage(type, message) {
-            const messageBox = document.createElement('div');
-            messageBox.textContent = message;
-            messageBox.className = 'fixed top-4 right-4 z-50 p-3 rounded-lg shadow-xl text-white font-semibold transition-all duration-300 opacity-0 transform translate-y-4';
-
-            if (type === 'success') {
-                messageBox.classList.add('bg-green-500');
-            } else if (type === 'error') {
-                messageBox.classList.add('bg-red-500');
-            } else if (type === 'info' || type === 'warning') {
-                messageBox.classList.add('bg-blue-500');
-            }
-
-            document.body.appendChild(messageBox);
-
-            // Mostrar el mensaje
-            setTimeout(() => {
-                messageBox.classList.remove('opacity-0', 'translate-y-4');
-            }, 10);
-
-            // Ocultar y remover el mensaje después de 3 segundos
-            setTimeout(() => {
-                messageBox.classList.add('opacity-0', 'translate-y-4');
-                // Remover después de la transición
-                setTimeout(() => messageBox.remove(), 300);
-            }, 3000);
-        }
-
+        let groupsState = [];
+        let thirdPlacePool = []; 
+        let selectedThirds = []; 
+        let matches = {};
 
         // --- INICIALIZACIÓN ---
-        document.addEventListener('DOMContentLoaded', () => {
+        function init() {
+            groupsState = groupData.map(g => ({
+                id: g.id,
+                teams: g.teams.map(code => ({ code })),
+                selectionOrder: [] 
+            }));
             renderGroups();
-            renderPots();
-            undoButton.addEventListener('click', undoLastAction);
-            console.log("Aplicación de Sorteo de Grupos del Mundial con Drag-and-Drop inicializada.");
-        });
-    </script>
+        }
 
+        // --- GRUPOS ---
+        function renderGroups() {
+            const grid = document.getElementById('groups-grid');
+            grid.innerHTML = '';
+            
+            let allComplete = true;
+
+            groupsState.forEach((g, gIdx) => {
+                const card = document.createElement('div');
+                card.className = "group-card";
+                const isComplete = g.selectionOrder.length === 3;
+                if(!isComplete) allComplete = false;
+                
+                // Header de Grupo
+                card.innerHTML = `<div class="flex justify-between items-center text-xs font-bold mb-3 px-1 border-b border-gray-100 pb-2">
+                    <span class="text-blue-900">GRUPO ${g.id}</span>
+                    <span class="${isComplete ? 'text-green-600 bg-green-100 px-2 py-0.5 rounded' : 'text-gray-400'}">${g.selectionOrder.length}/3</span>
+                </div>`;
+
+                g.teams.forEach((t, tIdx) => {
+                    const row = document.createElement('div');
+                    const rankIndex = g.selectionOrder.indexOf(tIdx);
+                    const rank = rankIndex + 1;
+                    
+                    let badgeClass = "";
+                    let rankText = "";
+                    let rowClass = "";
+
+                    if(rank === 1) { badgeClass = "bg-gold visible"; rankText="1"; rowClass="rank-1"; }
+                    if(rank === 2) { badgeClass = "bg-silver visible"; rankText="2"; rowClass="rank-2"; }
+                    if(rank === 3) { badgeClass = "bg-bronze visible"; rankText="3"; rowClass="rank-3"; }
+
+                    row.className = `team-row ${rowClass}`;
+                    row.onclick = () => handleGroupClick(gIdx, tIdx);
+
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-8 h-5 rounded border border-gray-200 object-cover">
+                            <span class="text-sm font-medium">${t.code}</span>
+                        </div>
+                        <div class="rank-badge ${badgeClass}">${rankText}</div>
+                    `;
+                    card.appendChild(row);
+                });
+                grid.appendChild(card);
+            });
+
+            const btn = document.getElementById('group-done-btn');
+            if(allComplete) {
+                btn.classList.remove('opacity-0');
+                btn.style.pointerEvents = "auto";
+            } else {
+                btn.classList.add('opacity-0');
+                btn.style.pointerEvents = "none";
+            }
+        }
+
+        function handleGroupClick(gIdx, tIdx) {
+            const group = groupsState[gIdx];
+            const currentOrder = group.selectionOrder;
+            const existingIndex = currentOrder.indexOf(tIdx);
+
+            if (existingIndex !== -1) {
+                group.selectionOrder = currentOrder.filter(idx => idx !== tIdx);
+            } else {
+                if (currentOrder.length < 3) {
+                    group.selectionOrder.push(tIdx);
+                }
+            }
+            renderGroups();
+        }
+
+        // --- TERCEROS ---
+        function initThirdsPhase() {
+            thirdPlacePool = groupsState.map(g => {
+                const thirdIdx = g.selectionOrder[2];
+                return { ...g.teams[thirdIdx], groupId: g.id };
+            });
+
+            document.getElementById('view-groups').classList.add('hidden');
+            document.getElementById('view-thirds').classList.remove('hidden');
+            document.getElementById('view-thirds').classList.add('flex');
+            document.getElementById('step-indicator').innerText = "Repechaje";
+            renderThirdsGrid();
+        }
+
+        function renderThirdsGrid() {
+            const container = document.getElementById('thirds-container');
+            container.innerHTML = '';
+            thirdPlacePool.forEach((t, idx) => {
+                const isSelected = selectedThirds.includes(idx);
+                const div = document.createElement('div');
+                div.className = `third-card ${isSelected ? 'picked' : ''}`;
+                div.onclick = () => toggleThirdSelection(idx);
+                div.innerHTML = `
+                    <div class="text-[10px] font-bold text-gray-400 mb-1">GRUPO ${t.groupId}</div>
+                    <img src="https://flagcdn.com/w40/${translateFlag(t.code)}.png" class="w-10 h-6 mx-auto rounded shadow-sm mb-2 object-cover">
+                    <div class="font-bold text-sm text-gray-800">${t.code}</div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('thirds-counter').innerText = `${selectedThirds.length} / 8`;
+            const btn = document.getElementById('thirds-done-btn');
+            if(selectedThirds.length === 8) btn.classList.remove('hidden');
+            else btn.classList.add('hidden');
+        }
+
+        function toggleThirdSelection(idx) {
+            if(selectedThirds.includes(idx)) {
+                selectedThirds = selectedThirds.filter(i => i !== idx);
+            } else {
+                if(selectedThirds.length < 8) selectedThirds.push(idx);
+            }
+            renderThirdsGrid();
+        }
+
+        // --- BRACKET PROTEGIDO ---
+        function finalizeTournament() {
+            document.getElementById('view-thirds').classList.add('hidden');
+            document.getElementById('view-bracket').classList.remove('hidden');
+            document.getElementById('step-indicator').innerText = "Fase Final";
+            generateBracket();
+        }
+
+        function generateBracket() {
+            const get1st = (gid) => { const g = groupsState.find(x => x.id === gid); return { ...g.teams[g.selectionOrder[0]], from: gid }; };
+            const get2nd = (gid) => { const g = groupsState.find(x => x.id === gid); return { ...g.teams[g.selectionOrder[1]], from: gid }; };
+            
+            const validThirds = selectedThirds.map(idx => thirdPlacePool[idx]);
+            let thirdCounter = 0;
+            const getNextThird = () => { if(thirdCounter < validThirds.length) return validThirds[thirdCounter++]; return { code: "TBD" }; };
+
+            /* LÓGICA PROTEGIDA (Arg vs Esp en Final) */
+            const matchesData = [
+                // === LADO IZQUIERDO ===
+                { id: 1, p1: get2nd("A"), p2: get2nd("B"), next: 17 },
+                { id: 2, p1: get1st("J"), p2: getNextThird(), next: 17 }, // 1° J (Arg)
+                { id: 3, p1: get1st("C"), p2: get2nd("F"), next: 18 },    
+                { id: 4, p1: get1st("E"), p2: get2nd("I"), next: 18 },    
+                
+                { id: 5, p1: get1st("G"), p2: getNextThird(), next: 19 },
+                { id: 6, p1: get1st("D"), p2: getNextThird(), next: 19 },
+                { id: 7, p1: get1st("L"), p2: getNextThird(), next: 20 }, // 1° L (Eng)
+                { id: 8, p1: get1st("F"), p2: get2nd("C"), next: 20 },
+
+                // === LADO DERECHO ===
+                { id: 9, p1: get1st("A"), p2: getNextThird(), next: 21 },
+                { id: 10, p1: get1st("H"), p2: get2nd("J"), next: 21 },   // 1° H (Esp)
+                { id: 11, p1: get1st("K"), p2: getNextThird(), next: 22 },
+                { id: 12, p1: get1st("B"), p2: getNextThird(), next: 22 },
+
+                { id: 13, p1: get2nd("D"), p2: get2nd("G"), next: 23 },
+                { id: 14, p1: get2nd("E"), p2: get2nd("K"), next: 23 },
+                { id: 15, p1: get1st("I"), p2: getNextThird(), next: 24 }, // 1° I (Fra)
+                { id: 16, p1: get2nd("H"), p2: get2nd("L"), next: 24 }     
+            ];
+
+            matchesData.forEach(m => matches[m.id] = { ...m, winner: null });
+            
+            // Generar Rondas (IDs planos)
+            const mapNext = (curr, next) => { matches[curr] = { id: curr, p1:null, p2:null, winner:null, next: next }; };
+            [17,18].forEach(i => mapNext(i, 25)); // Octavos L1
+            [19,20].forEach(i => mapNext(i, 26)); // Octavos L2
+            [21,22].forEach(i => mapNext(i, 27)); // Octavos R1
+            [23,24].forEach(i => mapNext(i, 28)); // Octavos R2
+            [25,26].forEach(i => mapNext(i, 29)); // Cuartos L
+            [27,28].forEach(i => mapNext(i, 30)); // Cuartos R
+            mapNext(29, 31); mapNext(30, 31);     // Semis -> Final
+            matches[31] = { id: 31, p1:null, p2:null, winner:null, next:null };
+
+            renderVisualBracket();
+        }
+
+        function renderVisualBracket() {
+            const canvas = document.getElementById('bracket-canvas');
+            canvas.innerHTML = '';
+
+            const cols = [
+                { ids: [1,2,3,4,5,6,7,8] }, // L32
+                { ids: [17,18,19,20] },     // L16
+                { ids: [25,26] },           // LQF
+                { ids: [29] },              // LSF
+                { ids: [31], isFinal: true },// FINAL
+                { ids: [30] },              // RSF
+                { ids: [27,28] },           // RQF
+                { ids: [21,22,23,24] },     // R16
+                { ids: [9,10,11,12,13,14,15,16] } // R32
+            ];
+
+            cols.forEach(col => {
+                const colDiv = document.createElement('div');
+                colDiv.className = "round-col";
+                
+                if(col.isFinal) {
+                    colDiv.innerHTML = `<div class="text-3xl text-center mb-2 animate-bounce">🏆</div>`;
+                }
+
+                col.ids.forEach(id => {
+                    const m = matches[id];
+                    const div = document.createElement('div');
+                    div.className = "match-node";
+                    
+                    const p1 = m.p1 ? m.p1.code : "?";
+                    const p2 = m.p2 ? m.p2.code : "?";
+                    
+                    div.innerHTML = `
+                        <div onclick="pickWinner(${id}, 'p1')" class="cursor-pointer">
+                            <img src="https://flagcdn.com/w40/${translateFlag(p1)}.png" class="team-flag-sm ${m.p1 ? 'active' : ''} ${m.winner?.code===p1 ? 'winner':''}">
+                        </div>
+                        <div class="h-[1px] bg-gray-200 w-full"></div>
+                        <div onclick="pickWinner(${id}, 'p2')" class="cursor-pointer">
+                            <img src="https://flagcdn.com/w40/${translateFlag(p2)}.png" class="team-flag-sm ${m.p2 ? 'active' : ''} ${m.winner?.code===p2 ? 'winner':''}">
+                        </div>
+                    `;
+                    colDiv.appendChild(div);
+                });
+                canvas.appendChild(colDiv);
+            });
+            
+            setTimeout(() => {
+                const scroller = document.getElementById('bracket-scroller');
+                scroller.scrollLeft = (scroller.scrollWidth - scroller.clientWidth) / 2;
+            }, 50);
+        }
+
+        function pickWinner(mid, slot) {
+            const m = matches[mid];
+            const winner = slot === 'p1' ? m.p1 : m.p2;
+            if(!winner || !winner.code || winner.code === "?") return;
+
+            if(m.winner && m.winner.code !== winner.code && m.next) {
+                resetTree(m.next);
+            }
+            m.winner = winner;
+
+            if(m.next) {
+                const nextM = matches[m.next];
+                const isTopSlot = (mid % 2 !== 0); 
+                if(isTopSlot) nextM.p1 = winner; else nextM.p2 = winner;
+                nextM.winner = null;
+            } else {
+                 alert("¡CAMPEÓN: " + winner.code + "!");
+            }
+            renderVisualBracket();
+        }
+
+        function resetTree(mid) {
+            if(!matches[mid]) return;
+            matches[mid].winner = null;
+            if(matches[mid].next) resetTree(matches[mid].next);
+        }
+
+        function translateFlag(code) {
+             const map = { 
+                "MEX":"mx", "RSA":"za", "KOR":"kr", "EUR":"eu", "CAN":"ca", "QAT":"qa", "SUI":"ch", 
+                "BRA":"br", "MAR":"ma", "HAI":"ht", "SCO":"gb-sct", "USA":"us", "PAR":"py", "AUS":"au", 
+                "GER":"de", "CUW":"cw", "CIV":"ci", "ECU":"ec", "NED":"nl", "JPN":"jp", "TUN":"tn", 
+                "BEL":"be", "EGY":"eg", "IRN":"ir", "NZL":"nz", "ESP":"es", "CPV":"cv", "KSA":"sa", "URU":"uy",
+                "FRA":"fr", "SEN":"sn", "INT":"un", "NOR":"no", "ARG":"ar", "ALG":"dz", "AUT":"at", "JOR":"jo",
+                "POR":"pt", "UZB":"uz", "COL":"co", "ENG":"gb-eng", "CRO":"hr", "GHA":"gh", "PAN":"pa"
+            };
+            return map[code] || "un";
+        }
+
+        init();
+    </script>
 </body>
 </html>
