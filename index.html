@@ -49,13 +49,26 @@
         /* --- CONTENEDORES --- */
         .main-container {
             position: absolute; top: var(--header-height); bottom: 0; left: 0; right: 0;
-            overflow-y: auto; background: var(--bg-body); padding-bottom: 60px;
+            background: var(--bg-body); padding-bottom: 60px;
+        }
+
+        /* --- TABS MOBILE --- */
+        .tab-btn {
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            outline: none;
+        }
+        .tab-btn.active {
+            color: #030712;
+            background: var(--brand-yellow);
+            border-color: var(--brand-yellow);
         }
 
         /* --- BRACKET --- */
         #bracket-scroller {
             width: 100%; height: 100%; overflow: auto; display: flex; align-items: flex-start;
-            padding: 40px 20px; background: #030712;
+            padding: 24px 16px; background: #030712;
         }
         .bracket-wrapper { display: flex; align-items: center; gap: 28px; width: max-content; margin: 0 auto; min-height: 100%; }
         .round-col { display: flex; flex-direction: column; justify-content: center; gap: 20px; min-width: 96px; }
@@ -126,8 +139,16 @@
         <button onclick="confirmReset()" class="btn-reset">Reiniciar Llave</button>
     </header>
 
-    <div id="view-bracket" class="main-container p-0">
-        <div id="bracket-scroller">
+    <div id="view-bracket" class="main-container p-0 flex flex-col h-[calc(100dvh-64px)]">
+        <!-- Selector de rondas en móvil -->
+        <div id="round-selector" class="flex justify-around items-center bg-[#0f172a] border-b border-slate-800 p-2 md:hidden shrink-0">
+            <button onclick="setMobileRound('R32')" id="tab-R32" class="tab-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition">R32</button>
+            <button onclick="setMobileRound('R16')" id="tab-R16" class="tab-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition">Octavos</button>
+            <button onclick="setMobileRound('QF')" id="tab-QF" class="tab-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition">Cuartos</button>
+            <button onclick="setMobileRound('SF')" id="tab-SF" class="tab-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition">Semis</button>
+            <button onclick="setMobileRound('F')" id="tab-F" class="tab-btn px-3 py-1.5 rounded-full text-[10px] font-bold transition">Final</button>
+        </div>
+        <div id="bracket-scroller" class="grow">
             <div id="bracket-canvas" class="bracket-wrapper"></div>
         </div>
     </div>
@@ -146,17 +167,57 @@
 
     <script>
         let matches = {};
+        let activeRound = "all";
 
         function init() {
+            // Detectar si la pantalla es móvil (ancho menor a 768px)
+            if (window.innerWidth < 768) {
+                activeRound = "R32";
+            } else {
+                activeRound = "all";
+            }
             generateBracket();
-            setTimeout(() => {
-                const scroller = document.getElementById('bracket-scroller');
-                const trophy = document.getElementById('trophy-col');
-                if (scroller && trophy) {
-                    const centerPos = trophy.offsetLeft - (scroller.clientWidth / 2) + (trophy.clientWidth / 2);
-                    scroller.scrollTo({ left: centerPos, behavior: 'smooth' });
-                }
-            }, 300);
+            updateTabStyles();
+            
+            // Autocentrar en escritorio
+            if (activeRound === "all") {
+                setTimeout(() => {
+                    const scroller = document.getElementById('bracket-scroller');
+                    const trophy = document.getElementById('trophy-col');
+                    if (scroller && trophy) {
+                        const centerPos = trophy.offsetLeft - (scroller.clientWidth / 2) + (trophy.clientWidth / 2);
+                        scroller.scrollTo({ left: centerPos, behavior: 'smooth' });
+                    }
+                }, 300);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const isMobile = window.innerWidth < 768;
+            if (isMobile && activeRound === "all") {
+                activeRound = "R32";
+                renderVisualBracket();
+                updateTabStyles();
+            } else if (!isMobile && activeRound !== "all") {
+                activeRound = "all";
+                renderVisualBracket();
+            }
+        });
+
+        function setMobileRound(round) {
+            activeRound = round;
+            renderVisualBracket();
+            updateTabStyles();
+        }
+
+        function updateTabStyles() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`tab-${activeRound}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
         }
 
         function confirmReset() { 
@@ -228,18 +289,23 @@
             
             // Columnas ordenadas visualmente: Izquierda -> Centro (Final) -> Derecha
             const cols = [
-                { ids: [74, 77, 73, 75, 83, 84, 81, 82] }, // R32 Izq
-                { ids: [89, 90, 93, 94] },                 // R16 Izq
-                { ids: [97, 98] },                         // QF Izq
-                { ids: [101] },                            // SF Izq
-                { ids: [104], isFinal: true },             // FINAL (Centro)
-                { ids: [102] },                            // SF Der
-                { ids: [99, 100] },                        // QF Der
-                { ids: [91, 92, 95, 96] },                 // R16 Der
-                { ids: [76, 78, 79, 80, 86, 88, 85, 87] }  // R32 Der
+                { id: "R32_L", round: "R32", ids: [74, 77, 73, 75, 83, 84, 81, 82] }, // R32 Izq
+                { id: "R16_L", round: "R16", ids: [89, 90, 93, 94] },                 // R16 Izq
+                { id: "QF_L",  round: "QF",  ids: [97, 98] },                         // QF Izq
+                { id: "SF_L",  round: "SF",  ids: [101] },                            // SF Izq
+                { id: "F",     round: "F",   ids: [104], isFinal: true },             // FINAL (Centro)
+                { id: "SF_R",  round: "SF",  ids: [102] },                            // SF Der
+                { id: "QF_R",  round: "QF",  ids: [99, 100] },                        // QF Der
+                { id: "R16_R", round: "R16", ids: [91, 92, 95, 96] },                 // R16 Der
+                { id: "R32_R", round: "R32", ids: [76, 78, 79, 80, 86, 88, 85, 87] }  // R32 Der
             ];
 
-            cols.forEach(col => {
+            // Filtrar columnas si estamos en móvil para mostrar solo la ronda seleccionada
+            const visibleCols = activeRound === "all" 
+                ? cols 
+                : cols.filter(col => col.round === activeRound);
+
+            visibleCols.forEach(col => {
                 const colDiv = document.createElement('div'); 
                 colDiv.className = "round-col";
                 
@@ -247,8 +313,7 @@
                     colDiv.id = "trophy-col"; 
                     colDiv.innerHTML = `
                         <div class="flex flex-col items-center justify-center mb-6">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/e/ec/FIFA_World_Cup_Trophy.svg" class="h-28 object-contain drop-shadow-[0_0_15px_rgba(253,224,71,0.3)] animate-pulse" alt="Copa del Mundo">
-                            <div class="text-[10px] font-black text-green-500 tracking-widest mt-3 uppercase">FINAL - 19/7</div>
+                            <div class="text-[10px] font-black text-green-500 tracking-widest uppercase">FINAL - 19/7</div>
                         </div>
                     `; 
                 }
@@ -287,8 +352,14 @@
                 canvas.appendChild(colDiv);
             });
             
-            scroller.scrollLeft = scrollX; 
-            scroller.scrollTop = scrollY;
+            // Solo recordar scroll horizontal en vista completa (escritorio)
+            if (activeRound === "all") {
+                scroller.scrollLeft = scrollX; 
+                scroller.scrollTop = scrollY;
+            } else {
+                scroller.scrollLeft = 0;
+                scroller.scrollTop = 0;
+            }
         }
 
         function pickWinner(mid, slot) {
